@@ -1,12 +1,14 @@
 define([
     'React',
-], function(React) {
+    'Bacon'
+], function(React, Bacon) {
 
   'use strict';
 
-  var conjthisMain = {}, d = React.DOM;
+  var ct = {},
+      d = React.DOM;
 
-  conjthisMain.words = [
+  ct.words = [
     {
       type: 'verb',
       english: 'to eat',
@@ -15,7 +17,6 @@ define([
       conjugations: {
         indicative: {
           present: {
-            'pattern': 'regular',
             'yo': 'como',
             'tú': 'comes',
             'él/ella/Ud.': 'come',
@@ -24,7 +25,6 @@ define([
             'ellos/ellas/Uds.': 'comen'
           },
           preterit: {
-            'pattern': 'regular',
             'yo': 'comí',
             'tú': 'comiste',
             'él/ella/Ud.': 'comió',
@@ -43,7 +43,6 @@ define([
       conjugations: {
         indicative: {
           present: {
-            'pattern': 'irregular',
             'yo': 'voy',
             'tú': 'vas',
             'él/ella/Ud.': 'va',
@@ -52,7 +51,6 @@ define([
             'ellos/ellas/Uds.': 'van'
           },
           preterit: {
-            'pattern': 'irregular',
             'yo': 'fui',
             'tú': 'fuiste',
             'él/ella/Ud.': 'fue',
@@ -80,13 +78,44 @@ define([
     }
   ];
 
-  conjthisMain.choose = function(arr){
-    var i = Math.round(Math.random() * arr.length - 1);
+  ct.choose = function(arr){
+    var i = Math.round(Math.random() * (arr.length - 1));
     return arr[i];
   };
 
+  ct.createTask = function(word){
+    var arr;
+    if(word.type == 'verb'){
+      arr = ct.randomKeyValue(word.conjugations.indicative.present);
+      return {
+        display: word.spanish,
+        prompt: arr[0],
+        solution: arr[1]
+      }
+    } else if(['adjective', 'adverb', 'noun'].indexOf(word.type) >= 0){
+      return {
+        display: word.english,
+        prompt: 'Spanish',
+        solution: word.spanish
+      }
+    } else {
+      throw new Error();
+    }
+  };
 
-  conjthisMain.ConjugatorTextInput = React.createClass({
+  ct.nextTask = function(){
+    return ct.createTask(
+        ct.choose(
+            ct.words));
+  };
+
+  ct.randomKeyValue = function(obj){
+    var keys = Object.keys(obj),
+        k = keys[Math.round(Math.random() * (keys.length - 1))];
+    return [k, obj[k]];
+  };
+
+  ct.ConjugatorTextInput = React.createClass({
     displayName: 'ConjugatorTextInput',
     SHIFT: 16,
     ALT: 18,
@@ -117,7 +146,7 @@ define([
 
     render: function(){
       return d.input({
-        className: 'form-control',
+        className: 'form-control input-lg',
         type: 'text',
         onKeyPress: this.onKeyPress,
         onChange: this.onChange,
@@ -201,7 +230,7 @@ define([
   });
 
 
-  conjthisMain.ConjugatorForm = React.createClass({
+  ct.ConjugatorForm = React.createClass({
 
     displayName: 'ConjugatorForm',
 
@@ -213,36 +242,41 @@ define([
 
     render: function(){
       return d.div({},
-        d.form({className: 'form-horizontal', role: 'form'},
-
-            d.div({className: 'form-group'},
-            d.label({className: 'col-sm-2 control-label'}, 'English'),
-            d.div({className: 'col-sm-10'},
-              d.p({className: 'form-control-static'}, 'Something English')
-            )
+        d.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
+          d.div({className: 'container'},
+            d.span({className: 'navbar-brand'}, 'Conjugate this')
+          )
+        ),
+        d.div({className: 'container'},
+          d.p({className: 'stats', style: {textAlign: 'right'}},
+            d.span({}, 'Total ', d.span({className: 'badge'}, this.props.correct + ' / ' + this.props.attempted)),
+            d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.streak))
           ),
-
-          d.div({className: 'form-group'},
-            d.label({className: 'col-sm-2 control-label'}, 'Spanish'),
-            d.div({className: 'col-sm-10'},
-              conjthisMain.ConjugatorTextInput()
-            )
-          ),
-
-          d.div({className: 'form-group'},
-            d.label({className: 'col-sm-2 control-label'}, ''),
-            d.div({className: 'col-sm-10'},
-              d.span({}, this.state.shiftKey ? 'Á' : 'á'),
-              d.span({}, this.state.shiftKey ? 'É' : 'é'),
-              d.span({}, this.state.shiftKey ? 'Í' : 'í'),
-              d.span({}, this.state.shiftKey ? 'Ó' : 'ó'),
-              d.span({}, this.state.shiftKey ? 'Ú' : 'ú'),
-              d.span({}, this.state.shiftKey ? 'Ü' : 'ü'),
-              d.span({}, this.state.shiftKey ? 'Ñ' : 'ñ')
+          d.div({className: 'panel panel-default'},
+            d.div({className: 'panel-body'},
+              d.h2({style: {margin: '0.75em 0'}}, this.props.task.display),
+              d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
+                d.div({className: 'form-group'},
+                  d.div({className: 'input-group'},
+                    d.span({className: 'input-group-addon'},
+                        d.span({style: {display: 'inline-block', width: '90px'}}, this.props.task.prompt)
+                    ),
+                    ct.ConjugatorTextInput({ref: 'conjugatorTextInput'})
+                  )
+                )
+              )
             )
           )
         )
       )
+    },
+
+    onSubmit: function(e){
+      e.preventDefault();
+      this.props.bus.push({
+        type: 'submit',
+        value: this.refs.conjugatorTextInput.state.value
+      });
     },
 
     onKeyDown: function(e){
@@ -259,11 +293,45 @@ define([
     }
   });
 
-  conjthisMain.init = function(){
-    var el = document.createElement('div');
+  ct.init = function(){
+
+    var el = document.createElement('div'),
+        bus = new Bacon.Bus(),
+        component;
+
     document.body.appendChild(el);
-    React.renderComponent(conjthisMain.ConjugatorForm({}), el);
+
+    bus.subscribe(update);
+
+    component = React.renderComponent(ct.ConjugatorForm(initialAppState()), el);
+
+    function initialAppState(){
+      return {
+        bus: bus,
+        task: ct.nextTask(),
+        correct: 0,
+        attempted: 0,
+        streak: 0
+      }
+    }
+
+    function update(baconMsg){
+      var isCorrect,
+          message = baconMsg.value();
+
+      if(message.type === 'submit'){
+        isCorrect = message.value === component.props.task.solution;
+        component.setProps({
+          task: ct.nextTask(),
+          correct: isCorrect ? component.props.correct + 1 : component.props.correct,
+          attempted: component.props.attempted + 1,
+          streak: isCorrect ? component.props.streak + 1 : 0
+        })
+      } else {
+        throw new Error();
+      }
+    }
   };
 
-  return conjthisMain;
+  return ct;
 });

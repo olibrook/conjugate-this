@@ -4,7 +4,7 @@ require.config({
     Backbone: 'public/lib/backbone/backbone',
     React: 'public/lib/react/react',
     jquery: 'public/lib/jquery/dist/jquery.min',
-    Mousetrap: 'public/lib/mousetrap/mousetrap',
+    Bacon: 'public/lib/bacon/dist/Bacon',
 
     conjthisMain: 'public/src/js/conjthisMain'
   }

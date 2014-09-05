@@ -6,6 +6,7 @@
     "react": "~0.10.0",
     "backbone": "~1.1.2",
     "requirejs": "~2.1.11",
-    "almond": "~0.2.9"
+    "almond": "~0.2.9",
+    "bacon": "0.7.22"
   }
 }
