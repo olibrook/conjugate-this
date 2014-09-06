@@ -278,6 +278,15 @@ define([
 
     onSubmit: function(e){
       e.preventDefault();
+      this.getDOMNode().dispatchEvent(
+          new CustomEvent('command', {
+            detail: {
+              type: 'submit',
+              value: this.refs.conjugatorTextInput.state.value
+            },
+            bubbles: true,
+            cancelable: false
+          }));
     },
 
     onKeyDown: function(e){
@@ -294,6 +303,8 @@ define([
     }
   });
 
+
+  // Data -------------
 
   /**
    * A translation/conjugation task.
@@ -316,55 +327,48 @@ define([
     streak: 0
   });
 
+  ct.nextState = function(appState, message){
+    var isCorrect;
+    if(!appState){
+       return new ct.AppState({task: ct.nextTask()})
+    }
+
+    else if(message.type === 'submit'){
+      isCorrect = message.value === appState.task.solution;
+      return appState.mergeDeep({
+        task: ct.nextTask(),
+        correct: isCorrect ? appState.correct + 1 : appState.correct,
+        attempted: appState.attempted + 1,
+        streak: isCorrect ? appState.streak + 1 : 0
+      });
+    }
+
+    else {
+      throw new Error();
+    }
+  };
+
   ct.init = function(){
 
     var el = document.createElement('div'),
         bus = new Bacon.Bus(),
-        component,
-        appState;
+        appState = ct.nextState(null, null),
+        component = React.renderComponent(ct.ConjugatorForm({as: appState}), el),
+        commandStream;
 
     document.body.appendChild(el);
 
-    bus.subscribe(update);
+    commandStream = Bacon.fromEventTarget(el, "command", function(event){
+      return event.detail
+    });
 
-    function update(baconMsg){
-      var isCorrect,
-          message = baconMsg.value();
+    bus.plug(commandStream);
+    bus.onValue(update);
 
-      if(message.type === 'init'){
-         appState = new ct.AppState({task: ct.nextTask()})
-      }
-
-      else if(message.type === 'submit'){
-        isCorrect = message.value === appState.task.solution;
-        appState = appState.mergeDeep({
-          task: ct.nextTask(),
-          correct: isCorrect ? appState.correct + 1 : appState.correct,
-          attempted: appState.attempted + 1,
-          streak: isCorrect ? appState.streak + 1 : 0
-        });
-      }
-
-      else {
-        throw new Error();
-      }
-
-      if(!component){
-        component = React.renderComponent(ct.ConjugatorForm({as: appState}), el);
-      } else {
-        component.setProps({as: appState});
-      }
+    function update(message){
+      appState = ct.nextState(appState, message);
+      component.setProps({as: appState});
     }
-
-    bus.push({type: 'init', value: null});
-
-
-    setInterval(function(){
-      bus.push({
-        type: 'submit',
-        value: 'ge-hurg'
-      });
-    }, 750);
   };
 
   return ct;
