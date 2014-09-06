@@ -1,14 +1,15 @@
 define([
     'React',
-    'Bacon'
-], function(React, Bacon) {
+    'Bacon',
+    'Immutable'
+], function(React, Bacon, Immutable) {
 
   'use strict';
 
   var ct = {},
       d = React.DOM;
 
-  ct.words = [
+  ct.words = Immutable.fromJS([
     {
       type: 'verb',
       english: 'to eat',
@@ -76,43 +77,47 @@ define([
       english: 'so',
       spanish: 'tan'
     }
-  ];
+  ]);
 
   ct.choose = function(arr){
-    var i = Math.round(Math.random() * (arr.length - 1));
-    return arr[i];
+    return arr.get(Math.round(Math.random() * (arr.length - 1)));
   };
 
   ct.createTask = function(word){
-    var arr;
-    if(word.type == 'verb'){
-      arr = ct.randomKeyValue(word.conjugations.indicative.present);
-      return {
-        display: word.spanish,
+    var arr, type;
+
+    type = word.get('type');
+
+    if(type == 'verb'){
+      arr = ct.randomKeyValue(word.getIn(['conjugations', 'indicative', 'present']));
+      return new ct.Task({
+        display: word.get('spanish'),
         prompt: arr[0],
         solution: arr[1]
-      }
-    } else if(['adjective', 'adverb', 'noun'].indexOf(word.type) >= 0){
-      return {
-        display: word.english,
+      });
+    }
+
+    else if(['adjective', 'adverb', 'noun'].indexOf(type) >= 0){
+      return new ct.Task({
+        display: word.get('english'),
         prompt: 'Spanish',
-        solution: word.spanish
-      }
-    } else {
+        solution: word.get('spanish')
+      });
+    }
+
+    else {
       throw new Error();
     }
   };
 
   ct.nextTask = function(){
-    return ct.createTask(
-        ct.choose(
-            ct.words));
+    return ct.createTask(ct.choose(ct.words));
   };
 
-  ct.randomKeyValue = function(obj){
-    var keys = Object.keys(obj),
+  ct.randomKeyValue = function(map){
+    var keys = map.flip().toArray(),
         k = keys[Math.round(Math.random() * (keys.length - 1))];
-    return [k, obj[k]];
+    return [k, map.get(k)];
   };
 
   ct.ConjugatorTextInput = React.createClass({
@@ -249,17 +254,17 @@ define([
         ),
         d.div({className: 'container'},
           d.p({className: 'stats', style: {textAlign: 'right'}},
-            d.span({}, 'Total ', d.span({className: 'badge'}, this.props.correct + ' / ' + this.props.attempted)),
-            d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.streak))
+            d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
+            d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.as.get('streak')))
           ),
           d.div({className: 'panel panel-default'},
             d.div({className: 'panel-body'},
-              d.h2({style: {margin: '0.75em 0'}}, this.props.task.display),
+              d.h2({style: {margin: '0.75em 0'}}, this.props.as.getIn(['task', 'display'])),
               d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
                 d.div({className: 'form-group'},
                   d.div({className: 'input-group'},
                     d.span({className: 'input-group-addon'},
-                        d.span({style: {display: 'inline-block', width: '90px'}}, this.props.task.prompt)
+                        d.span({style: {display: 'inline-block', width: '90px'}}, this.props.as.getIn(['task', 'prompt']))
                     ),
                     ct.ConjugatorTextInput({ref: 'conjugatorTextInput'})
                   )
@@ -273,10 +278,6 @@ define([
 
     onSubmit: function(e){
       e.preventDefault();
-      this.props.bus.push({
-        type: 'submit',
-        value: this.refs.conjugatorTextInput.state.value
-      });
     },
 
     onKeyDown: function(e){
@@ -293,44 +294,77 @@ define([
     }
   });
 
+
+  /**
+   * A translation/conjugation task.
+   * @type {*}
+   */
+  ct.Task = Immutable.Record({
+    display: '',
+    prompt: '',
+    solution: ''
+  });
+
+  /**
+   * The entire AppState is a single, immutable record.
+   * @type {*}
+   */
+  ct.AppState = Immutable.Record({
+    task: null,
+    correct: 0,
+    attempted: 0,
+    streak: 0
+  });
+
   ct.init = function(){
 
     var el = document.createElement('div'),
         bus = new Bacon.Bus(),
-        component;
+        component,
+        appState;
 
     document.body.appendChild(el);
 
     bus.subscribe(update);
 
-    component = React.renderComponent(ct.ConjugatorForm(initialAppState()), el);
-
-    function initialAppState(){
-      return {
-        bus: bus,
-        task: ct.nextTask(),
-        correct: 0,
-        attempted: 0,
-        streak: 0
-      }
-    }
-
     function update(baconMsg){
       var isCorrect,
           message = baconMsg.value();
 
-      if(message.type === 'submit'){
-        isCorrect = message.value === component.props.task.solution;
-        component.setProps({
+      if(message.type === 'init'){
+         appState = new ct.AppState({task: ct.nextTask()})
+      }
+
+      else if(message.type === 'submit'){
+        isCorrect = message.value === appState.task.solution;
+        appState = appState.mergeDeep({
           task: ct.nextTask(),
-          correct: isCorrect ? component.props.correct + 1 : component.props.correct,
-          attempted: component.props.attempted + 1,
-          streak: isCorrect ? component.props.streak + 1 : 0
-        })
-      } else {
+          correct: isCorrect ? appState.correct + 1 : appState.correct,
+          attempted: appState.attempted + 1,
+          streak: isCorrect ? appState.streak + 1 : 0
+        });
+      }
+
+      else {
         throw new Error();
       }
+
+      if(!component){
+        component = React.renderComponent(ct.ConjugatorForm({as: appState}), el);
+      } else {
+        component.setProps({as: appState});
+      }
     }
+
+    bus.push({type: 'init', value: null});
+
+
+    setInterval(function(){
+      bus.push({
+        type: 'submit',
+        value: 'ge-hurg'
+      });
+    }, 750);
   };
 
   return ct;
