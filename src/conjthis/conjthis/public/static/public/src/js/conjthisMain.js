@@ -1,8 +1,9 @@
 define([
     'React',
     'Bacon',
-    'Immutable'
-], function(React, Bacon, Immutable) {
+    'Immutable',
+    'jquery'
+], function(React, Bacon, Immutable, $) {
 
   'use strict';
 
@@ -257,8 +258,6 @@ define([
           )
         ),
         d.div({className: 'container'},
-//          d.p({className: 'stats', style: {textAlign: 'right'}},
-//          ),
           d.div({className: 'panel panel-default'},
             d.div({className: 'panel-heading', style: {textAlign: 'right'}},
               d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
@@ -272,7 +271,7 @@ define([
                     d.span({className: 'input-group-addon'},
                       d.span({style: {display: 'inline-block', width: '90px'}}, this.props.as.getIn(['task', 'prompt']))
                     ),
-                    ct.ConjugatorTextInput({ref: 'conjugatorTextInput', as: this.props.as})
+                    ct.ConjugatorTextInput({key: 'conjugatorTextInput', ref: 'conjugatorTextInput', as: this.props.as})
                   )
                 )
               )
@@ -280,6 +279,17 @@ define([
           )
         )
       )
+    },
+
+    componentDidMount: function(){
+      this.focusTextInput();
+    },
+
+    focusTextInput: function(){
+      // TODO: Looks like a React bug
+      setTimeout(function(){
+        this.refs.conjugatorTextInput.getDOMNode().focus();
+      }.bind(this), 40);
     },
 
     onSubmit: function(e){
