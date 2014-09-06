@@ -61,21 +61,6 @@ define([
           }
         }
       }
-    },
-    {
-      type: 'noun',
-      english: 'food',
-      spanish: 'comida'
-    },
-    {
-      type: 'adjective',
-      english: 'beautiful',
-      spanish: 'hermoso'
-    },
-    {
-      type: 'adverb',
-      english: 'so',
-      spanish: 'tan'
     }
   ]);
 
