@@ -257,18 +257,20 @@ define([
           )
         ),
         d.div({className: 'container'},
-          d.p({className: 'stats', style: {textAlign: 'right'}},
-            d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
-            d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.as.get('streak')))
-          ),
+//          d.p({className: 'stats', style: {textAlign: 'right'}},
+//          ),
           d.div({className: 'panel panel-default'},
+            d.div({className: 'panel-heading', style: {textAlign: 'right'}},
+              d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
+              d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.as.get('streak')))
+            ),
             d.div({className: 'panel-body'},
               d.h2({style: {margin: '0.75em 0'}}, this.props.as.getIn(['task', 'display'])),
               d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
                 d.div({className: 'form-group'},
                   d.div({className: 'input-group'},
                     d.span({className: 'input-group-addon'},
-                        d.span({style: {display: 'inline-block', width: '90px'}}, this.props.as.getIn(['task', 'prompt']))
+                      d.span({style: {display: 'inline-block', width: '90px'}}, this.props.as.getIn(['task', 'prompt']))
                     ),
                     ct.ConjugatorTextInput({ref: 'conjugatorTextInput', as: this.props.as})
                   )
