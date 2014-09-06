@@ -160,26 +160,27 @@ define([
         type: 'text',
         onKeyPress: this.onKeyPress,
         onChange: this.onChange,
-        value: this.state.value
+        value: this.props.as.get('answer')
       });
     },
 
     onKeyPress: function(e){
-      var value, char, unaccented, accented, index, isUpper, domNode, selectionStart;
+      var answer, char, unaccented, accented, index, isUpper, domNode, selectionStart;
 
       domNode = this.getDOMNode();
       selectionStart = domNode.selectionStart;
-      value = this.state.value;
+      answer = this.props.as.get('answer');
 
       if( (e.keyCode == this.UP) || (e.keyCode == this.DOWN) ){
         index = e.keyCode == this.UP ? this.state.modifierIndex + 1 : this.state.modifierIndex - 1;
-        char = value.length > 0 ? value.charAt(selectionStart - 1) : '';
+        char = answer.length > 0 ? answer.charAt(selectionStart - 1) : '';
         isUpper = char.toUpperCase() == char;
         unaccented = this.getUnaccented(char.toLowerCase());
         accented = this.getAccented(unaccented, index);
         accented = isUpper ? accented.toUpperCase() : accented;
-        value = value.slice(0, selectionStart -1) + accented + value.slice(selectionStart, value.length);
-        this.setState({value: value, modifierIndex: index, restoreCursor: selectionStart});
+        answer = answer.slice(0, selectionStart -1) + accented + answer.slice(selectionStart, answer.length);
+        this.setAnswer(answer);
+        this.setState({modifierIndex: index, restoreCursor: selectionStart});
       } else {
         this.setState({modifierIndex: 0, restoreCursor: null});
       }
@@ -235,7 +236,20 @@ define([
     },
 
     onChange: function(e){
-      this.setState({value: e.target.value});
+      this.setAnswer(e.target.value);
+    },
+
+    setAnswer: function(answer){
+      this.getDOMNode().dispatchEvent(
+        new CustomEvent('command', {
+          detail: {
+            type: 'setAnswer',
+            value: answer
+          },
+          bubbles: true,
+          cancelable: false
+        })
+      );
     }
   });
 
@@ -271,7 +285,7 @@ define([
                     d.span({className: 'input-group-addon'},
                         d.span({style: {display: 'inline-block', width: '90px'}}, this.props.as.getIn(['task', 'prompt']))
                     ),
-                    ct.ConjugatorTextInput({ref: 'conjugatorTextInput'})
+                    ct.ConjugatorTextInput({ref: 'conjugatorTextInput', as: this.props.as})
                   )
                 )
               )
@@ -284,14 +298,14 @@ define([
     onSubmit: function(e){
       e.preventDefault();
       this.getDOMNode().dispatchEvent(
-          new CustomEvent('command', {
-            detail: {
-              type: 'submit',
-              value: this.refs.conjugatorTextInput.state.value
-            },
-            bubbles: true,
-            cancelable: false
-          }));
+        new CustomEvent('command', {
+          detail: {
+            type: 'submit'
+          },
+          bubbles: true,
+          cancelable: false
+        })
+      );
     },
 
     onKeyDown: function(e){
@@ -326,7 +340,8 @@ define([
     task: null,
     correct: 0,
     attempted: 0,
-    streak: 0
+    streak: 0,
+    answer: ''
   });
 
   /**
@@ -347,17 +362,24 @@ define([
     }
 
     else if(message.type === 'submit'){
-      isCorrect = message.value === appState.task.solution;
+      isCorrect = appState.answer === appState.task.solution;
       return appState.mergeDeep({
         task: taskIterator.next(),
         correct: isCorrect ? appState.correct + 1 : appState.correct,
         attempted: appState.attempted + 1,
-        streak: isCorrect ? appState.streak + 1 : 0
+        streak: isCorrect ? appState.streak + 1 : 0,
+        answer: ''
+      });
+    }
+
+    else if(message.type === 'setAnswer'){
+      return appState.mergeDeep({
+        answer: message.value
       });
     }
 
     else {
-      throw new Error();
+      throw new Error('Unhandled message type: "' + message.type + '"');
     }
   };
 
