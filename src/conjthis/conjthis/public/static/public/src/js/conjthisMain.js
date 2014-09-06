@@ -110,8 +110,13 @@ define([
     }
   };
 
-  ct.nextTask = function(){
-    return ct.createTask(ct.choose(ct.words));
+  /**
+   * Infinitely yields Task instances.
+   */
+  ct.taskIterator = {
+      next: function(){
+        return ct.createTask(ct.choose(ct.words));
+      }
   };
 
   ct.randomKeyValue = function(map){
@@ -303,9 +308,6 @@ define([
     }
   });
 
-
-  // Data -------------
-
   /**
    * A translation/conjugation task.
    * @type {*}
@@ -327,16 +329,27 @@ define([
     streak: 0
   });
 
-  ct.nextState = function(appState, message){
+  /**
+   * The main logic of the app. Takes an old app state and returns a new one
+   * based on the input of some kind of application message.
+   *
+   * Keep this a pure function.
+   *
+   * @param appState
+   * @param message
+   * @param taskIterator
+   * @returns {*}
+   */
+  ct.nextState = function(appState, message, taskIterator){
     var isCorrect;
     if(!appState){
-       return new ct.AppState({task: ct.nextTask()})
+       return new ct.AppState({task: taskIterator.next()})
     }
 
     else if(message.type === 'submit'){
       isCorrect = message.value === appState.task.solution;
       return appState.mergeDeep({
-        task: ct.nextTask(),
+        task: taskIterator.next(),
         correct: isCorrect ? appState.correct + 1 : appState.correct,
         attempted: appState.attempted + 1,
         streak: isCorrect ? appState.streak + 1 : 0
@@ -348,27 +361,35 @@ define([
     }
   };
 
-  ct.init = function(){
+  /**
+   * Constructor for the app, bundles up those bits which are unavoidably
+   * stateful.
+   *
+   * @constructor
+   */
+  ct.ConjugateThis = function(){
+    this.el = document.createElement('div');
+    this.appState = ct.nextState(null, null, ct.taskIterator);
+    this.component = React.renderComponent(
+        ct.ConjugatorForm({as: this.appState}), this.el);
+    this.bus = new Bacon.Bus();
 
-    var el = document.createElement('div'),
-        bus = new Bacon.Bus(),
-        appState = ct.nextState(null, null),
-        component = React.renderComponent(ct.ConjugatorForm({as: appState}), el),
-        commandStream;
-
-    document.body.appendChild(el);
-
-    commandStream = Bacon.fromEventTarget(el, "command", function(event){
+    this.commandStream = Bacon.fromEventTarget(this.el, "command", function(event){
       return event.detail
     });
 
-    bus.plug(commandStream);
-    bus.onValue(update);
+    this.bus.plug(this.commandStream);
+    this.bus.onValue(
+      function(message){
+        this.appState = ct.nextState(this.appState, message, ct.taskIterator);
+        this.component.setProps({as: this.appState});
+      }.bind(this)
+    );
+  };
 
-    function update(message){
-      appState = ct.nextState(appState, message);
-      component.setProps({as: appState});
-    }
+  ct.init = function(){
+    var app = new ct.ConjugateThis();
+    document.body.appendChild(app.el);
   };
 
   return ct;
