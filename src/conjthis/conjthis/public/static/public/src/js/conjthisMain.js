@@ -144,15 +144,14 @@ define([
       return d.input({
         className: 'form-control input-lg',
         type: 'text',
-        onKeyPress: this.onKeyPress,
+        onKeyDown: this.onKeyDown,
         onChange: this.onChange,
         value: this.props.as.get('answer')
       });
     },
 
-    onKeyPress: function(e){
+    onKeyDown: function(e){
       var answer, char, unaccented, accented, index, isUpper, domNode, selectionStart;
-
       domNode = this.getDOMNode();
       selectionStart = domNode.selectionStart;
       answer = this.props.as.get('answer');
