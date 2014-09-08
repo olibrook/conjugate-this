@@ -251,6 +251,30 @@ define([
     },
 
     render: function(){
+      var statusMessage,
+          stateName;
+
+      stateName = this.props.as.get('stateName');
+
+      if(stateName === 'solveTask'){
+        statusMessage = d.div(
+          {className: 'alert alert-info'},
+          'Type your answer')
+
+      } else if(stateName === 'taskCorrect'){
+        statusMessage = d.div(
+          {className: 'alert alert-success'},
+          'That\'s right!')
+
+      } else if(stateName === 'taskIncorrect'){
+        statusMessage = d.div(
+          {className: 'alert alert-danger'},
+          'The right answer is "' + this.props.as.getIn(['task', 'solution']) + '"')
+
+      } else {
+        throw new Error('Unhandled stateName +"' + stateName + '"');
+      }
+
       return d.div({},
         d.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
           d.div({className: 'container'},
@@ -274,7 +298,8 @@ define([
                     ct.ConjugatorTextInput({key: 'conjugatorTextInput', ref: 'conjugatorTextInput', as: this.props.as})
                   )
                 )
-              )
+              ),
+              statusMessage
             )
           )
         )
@@ -297,7 +322,7 @@ define([
       this.getDOMNode().dispatchEvent(
         new CustomEvent('command', {
           detail: {
-            type: 'submit'
+            type: this.props.as.get('stateName') === 'solveTask' ? 'submit' : 'next'
           },
           bubbles: true,
           cancelable: false
@@ -334,6 +359,7 @@ define([
    * @type {*}
    */
   ct.AppState = Immutable.Record({
+    stateName: '',
     task: null,
     correct: 0,
     attempted: 0,
@@ -354,19 +380,30 @@ define([
    */
   ct.nextState = function(appState, message, taskIterator){
     var isCorrect;
+
     if(!appState){
-       return new ct.AppState({task: taskIterator.next()})
+      return new ct.AppState({
+        task: taskIterator.next(),
+        stateName: 'solveTask'
+      });
     }
 
     else if(message.type === 'submit'){
       isCorrect = appState.answer === appState.task.solution;
       return appState.mergeDeep({
-        task: taskIterator.next(),
+        stateName: isCorrect ? 'taskCorrect' : 'taskIncorrect',
         correct: isCorrect ? appState.correct + 1 : appState.correct,
         attempted: appState.attempted + 1,
-        streak: isCorrect ? appState.streak + 1 : 0,
-        answer: ''
+        streak: isCorrect ? appState.streak + 1 : 0
       });
+    }
+
+    if(message.type === 'next'){
+      return appState.mergeDeep({
+        stateName: 'solveTask',
+        task: taskIterator.next(),
+        answer: ''
+      })
     }
 
     else if(message.type === 'setAnswer'){
