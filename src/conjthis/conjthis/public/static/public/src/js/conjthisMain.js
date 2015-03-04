@@ -2,98 +2,48 @@ define([
     'React',
     'Bacon',
     'Immutable',
-    'jquery'
-], function(React, Bacon, Immutable, $) {
+    'conjthisVerbs'
+], function(React, Bacon, Immutable, conjthisVerbs) {
 
   'use strict';
 
   var ct = {},
-      d = React.DOM;
+      d = React.DOM,
+      PRONOUNS = Immutable.fromJS({
+        'yo': 0,
+        'tú': 1,
+        'él/ella/Ud.': 2,
+        'nosotros': 3,
+        'vosotros': 4,
+        'ellos/ellas/Uds.': 5
+      });
 
-  ct.words = Immutable.fromJS([
-    {
-      type: 'verb',
-      english: 'to eat',
-      spanish: 'comer',
-      reflexive: 'optional',
-      conjugations: {
-        indicative: {
-          present: {
-            'yo': 'como',
-            'tú': 'comes',
-            'él/ella/Ud.': 'come',
-            'nosotros': 'comemos',
-            'vosotros': 'coméis',
-            'ellos/ellas/Uds.': 'comen'
-          },
-          preterit: {
-            'yo': 'comí',
-            'tú': 'comiste',
-            'él/ella/Ud.': 'comió',
-            'nosotros': 'comimos',
-            'vosotros': 'comisteis',
-            'ellos/ellas/Uds.': 'comieron'
-          }
-        }
-      }
-    },
-    {
-      type: 'verb',
-      english: 'to go',
-      spanish: 'ir',
-      reflexive: 'optional',
-      conjugations: {
-        indicative: {
-          present: {
-            'yo': 'voy',
-            'tú': 'vas',
-            'él/ella/Ud.': 'va',
-            'nosotros': 'vamos',
-            'vosotros': 'vais',
-            'ellos/ellas/Uds.': 'van'
-          },
-          preterit: {
-            'yo': 'fui',
-            'tú': 'fuiste',
-            'él/ella/Ud.': 'fue',
-            'nosotros': 'fuimos',
-            'vosotros': 'fuisteis',
-            'ellos/ellas/Uds.': 'fueron'
-          }
-        }
-      }
-    }
-  ]);
+  ct.verbs = Immutable.fromJS(conjthisVerbs);
 
   ct.choose = function(arr){
     return arr.get(Math.round(Math.random() * (arr.length - 1)));
   };
 
-  ct.createTask = function(word){
-    var arr, type;
+  ct.createTask = function(verb){
+    var tense, pronoun, pronounText, pronounIdx, conjugations, conjugation, regularFlag, solution;
 
-    type = word.get('type');
+    tense = 'indicative/present';
 
-    if(type == 'verb'){
-      arr = ct.randomKeyValue(word.getIn(['conjugations', 'indicative', 'present']));
-      return new ct.Task({
-        display: word.get('spanish'),
-        prompt: arr[0],
-        solution: arr[1]
-      });
-    }
+    pronoun = ct.randomKeyValue(PRONOUNS);
+    pronounText = pronoun[0];
+    pronounIdx = pronoun[1];
 
-    else if(['adjective', 'adverb', 'noun'].indexOf(type) >= 0){
-      return new ct.Task({
-        display: word.get('english'),
-        prompt: 'Spanish',
-        solution: word.get('spanish')
-      });
-    }
+    conjugations = verb.getIn(['conjugations', tense]);
+    conjugation = conjugations.get(pronounIdx);
+    regularFlag = conjugation.get(0);
+    solution = conjugation.get(1);
 
-    else {
-      throw new Error();
-    }
+    return new ct.Task({
+      display: verb.get('spanish') + ' (' + verb.get('english') + ')',
+      prompt: pronounText,
+      regularFlag: regularFlag,
+      solution: solution
+    });
   };
 
   /**
@@ -101,7 +51,7 @@ define([
    */
   ct.taskIterator = {
       next: function(){
-        return ct.createTask(ct.choose(ct.words));
+        return ct.createTask(ct.choose(ct.verbs));
       }
   };
 

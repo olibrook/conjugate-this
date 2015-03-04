@@ -7,7 +7,8 @@ require.config({
     Bacon: 'public/lib/bacon/dist/Bacon',
     Immutable: 'public/lib/immutable/dist/Immutable',
 
-    conjthisMain: 'public/src/js/conjthisMain'
+    conjthisMain: 'public/src/js/conjthisMain',
+    conjthisVerbs: 'public/src/js/conjthisVerbs'
   }
 });
 

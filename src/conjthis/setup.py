@@ -12,6 +12,7 @@ setup(
         "django==1.5",
         "django-extensions",
         "psycopg2",
-        "factory_boy"
+        "factory_boy",
+        "beautifulsoup4",
     ]
 )
