@@ -188,7 +188,6 @@ define([
     }
   });
 
-
   ct.ConjugatorForm = React.createClass({
 
     displayName: 'ConjugatorForm',
@@ -201,9 +200,11 @@ define([
 
     render: function(){
       var statusMessage,
-          stateName;
+          stateName,
+          isIrregular;
 
       stateName = this.props.as.get('stateName');
+      isIrregular = this.props.as.getIn(['task', 'regularFlag']) === 'i';
 
       if(stateName === 'solveTask'){
         statusMessage = d.div(
@@ -231,6 +232,9 @@ define([
           )
         ),
         d.div({className: 'container'},
+
+          ct.SettingsForm(),
+
           d.div({className: 'panel panel-default'},
             d.div({className: 'panel-heading', style: {textAlign: 'right'}},
               d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
@@ -239,12 +243,13 @@ define([
             d.div({className: 'panel-body'},
               d.h2({style: {margin: '0.75em 0'}}, this.props.as.getIn(['task', 'display'])),
               d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
-                d.div({className: 'form-group'},
+                d.div({className: 'form-group' + (isIrregular ? ' has-warning has-feedback' : '')},
                   d.div({className: 'input-group'},
                     d.span({className: 'input-group-addon'},
                       d.span({style: {display: 'inline-block', width: '90px'}}, this.props.as.getIn(['task', 'prompt']))
                     ),
-                    ct.ConjugatorTextInput({key: 'conjugatorTextInput', ref: 'conjugatorTextInput', as: this.props.as})
+                    ct.ConjugatorTextInput({key: 'conjugatorTextInput', ref: 'conjugatorTextInput', as: this.props.as}),
+                    d.span({className: 'glyphicon glyphicon-warning-sign form-control-feedback', style: {visibility: isIrregular ? 'visible': 'hidden'}})
                   )
                 )
               ),
@@ -293,6 +298,77 @@ define([
     }
   });
 
+  ct.SettingsForm = React.createClass({
+
+    displayName: 'SettingsForm',
+
+    tenses: [
+      "indicative/present",
+      "indicative/preterite",
+      "indicative/future",
+      "indicative/conditional",
+      "indicative/imperfect",
+      "imperative/imperative",
+      "subjunctive/present",
+      "subjunctive/imperfect",
+      "subjunctive/imperfect-2",
+      "subjunctive/future"
+    ],
+
+    render: function(){
+
+      var tenseCheckboxes, pronounCheckboxes;
+
+      tenseCheckboxes = this.tenses.map(function(tense){
+        return d.div({className: 'checkbox'},
+          d.label({},
+            d.input({type: 'checkbox'}),
+            d.span({style: {verticalAlign: 'top'}}, tense)
+          )
+        );
+      });
+
+      pronounCheckboxes = [];
+      PRONOUNS.forEach(function(pronounIdx, pronoun){
+        pronounCheckboxes.push(d.div({className: 'checkbox'},
+          d.label({},
+            d.input({type: 'checkbox'}),
+            d.span({style: {verticalAlign: 'top'}}, pronoun)
+          )
+        ));
+      });
+
+      return d.div({className: 'panel panel-default'},
+        d.div({className: 'panel-heading'}, 'Settings Form'),
+        d.div({className: 'panel-body'},
+          d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
+
+            d.h2({}, 'Tenses'),
+            d.div({className: 'form-group'},
+              d.div({className: 'input-group'},
+                tenseCheckboxes
+              )
+            ),
+
+            d.h2({}, 'Pronouns'),
+            d.div({className: 'form-group'},
+              d.div({className: 'input-group'},
+                pronounCheckboxes
+              )
+            ),
+
+            d.button({type: 'submit', className: 'btn btn-primary', onSubmit: this.onSubmit}, 'Start exercise')
+          )
+        )
+      );
+    },
+
+    onSubmit: function(e){
+      alert('Submit!');
+      e.preventDefault();
+    }
+  });
+
   /**
    * A translation/conjugation task.
    * @type {*}
@@ -300,7 +376,8 @@ define([
   ct.Task = Immutable.Record({
     display: '',
     prompt: '',
-    solution: ''
+    solution: '',
+    regularFlag: ''
   });
 
   /**
