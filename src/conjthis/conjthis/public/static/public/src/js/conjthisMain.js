@@ -4,8 +4,9 @@ define([
     'Immutable',
     'conjthisVerbs',
     'conjthisViews',
-    'conjthisConstants'
-], function(React, Bacon, Immutable, ctVerbs, ctViews, ctConstants) {
+    'conjthisConstants',
+    'conjthisRecords'
+], function(React, Bacon, Immutable, ctVerbs, ctViews, ctConstants, ctRecords) {
 
   'use strict';
 
@@ -65,7 +66,7 @@ define([
     regularFlag = conjugation.get(0);
     solution = conjugation.get(1);
 
-    return new ctMain.Task({
+    return new ctRecords.Task({
       display: verb.get('spanish') + ' (' + verb.get('english') + ') ' + tense,
       prompt: pronoun,
       regularFlag: regularFlag,
@@ -84,35 +85,6 @@ define([
   };
 
 
-
-
-
-  /**
-   * A translation/conjugation task.
-   * @type {*}
-   */
-  ctMain.Task = Immutable.Record({
-    display: '',
-    prompt: '',
-    solution: '',
-    regularFlag: ''
-  });
-
-  /**
-   * The entire AppState is a single, immutable record.
-   * @type {*}
-   */
-  ctMain.AppState = Immutable.Record({
-    stateName: '',
-    task: null,
-    correct: 0,
-    attempted: 0,
-    streak: 0,
-    answer: '',
-    pronouns: {},
-    tenses: {}
-  });
-
   /**
    * The main logic of the app. Takes an old app state and returns a new one
    * based on the input of some kind of application message.
@@ -128,16 +100,7 @@ define([
     var isCorrect, obj;
 
     if(!appState){
-      return new ctMain.AppState({
-        task: null,
-        stateName: 'configureExercise',
-        pronouns: ctConstants.PRONOUNS.map(function(){
-          return true;
-        }).toMap(),
-        tenses: ctConstants.TENSES.map(function(){
-          return true;
-        }).toMap()
-      });
+      return new ctRecords.AppState();
     }
 
     if(appState.stateName === 'configureExercise'){

@@ -10,7 +10,8 @@ require.config({
     conjthisMain: 'public/src/js/conjthisMain',
     conjthisVerbs: 'public/src/js/conjthisVerbs',
     conjthisViews: 'public/src/js/conjthisViews',
-    conjthisConstants: 'public/src/js/conjthisConstants'
+    conjthisConstants: 'public/src/js/conjthisConstants',
+    conjthisRecords: 'public/src/js/conjthisRecords'
   }
 });
 
