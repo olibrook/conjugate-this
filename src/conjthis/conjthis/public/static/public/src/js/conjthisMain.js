@@ -42,7 +42,7 @@ define([
     return arr.get(Math.round(Math.random() * (arr.length - 1)));
   };
 
-  ct.createTask = function(verb){
+  ct.createTask = function(verb, appState){
     var tense, tenseId, tenseName, pronoun, pronounText, pronounIdx, conjugations, conjugation, regularFlag, solution;
 
     tense = ct.randomEntry(TENSES);
@@ -65,13 +65,8 @@ define([
     });
   };
 
-  /**
-   * Infinitely yields Task instances.
-   */
-  ct.taskIterator = {
-      next: function(){
-        return ct.createTask(ct.choose(ct.verbs));
-      }
+  ct.nextTask = function(appState){
+    return ct.createTask(ct.choose(ct.verbs), appState);
   };
 
   ct.randomEntry = function(arr){
@@ -484,10 +479,10 @@ define([
    *
    * @param appState
    * @param message
-   * @param taskIterator
+   * @param nextTask
    * @returns {*}
    */
-  ct.nextState = function(appState, message, taskIterator){
+  ct.nextState = function(appState, message, nextTask){
     var isCorrect, obj, initialPronouns, initialTenses;
 
     if(!appState){
@@ -526,7 +521,7 @@ define([
       if(message.type === 'startExercise'){
         return appState.mergeDeep({
           stateName: 'solveTask',
-          task: taskIterator.next(),
+          task: nextTask(appState),
           answer: ''
         });
       }
@@ -554,7 +549,7 @@ define([
       if(message.type === 'next'){
         return appState.mergeDeep({
           stateName: 'solveTask',
-          task: taskIterator.next(),
+          task: nextTask(appState),
           answer: ''
         })
       }
@@ -573,7 +568,7 @@ define([
    */
   ct.ConjugateThis = function(){
     this.el = document.createElement('div');
-    this.appState = ct.nextState(null, null, ct.taskIterator);
+    this.appState = ct.nextState(null, null, ct.nextTask);
 
     this.component = React.renderComponent(
         ct.ConjugatorMain({as: this.appState}), this.el);
@@ -586,7 +581,7 @@ define([
     this.bus.plug(this.commandStream);
     this.bus.onValue(
       function(message){
-        this.appState = ct.nextState(this.appState, message, ct.taskIterator);
+        this.appState = ct.nextState(this.appState, message, ct.nextTask);
         this.component.setProps({as: this.appState});
       }.bind(this)
     );
