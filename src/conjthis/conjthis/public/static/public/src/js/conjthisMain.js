@@ -7,16 +7,34 @@ define([
 
   'use strict';
 
-  var ct = {},
-      d = React.DOM,
-      PRONOUNS = Immutable.fromJS({
-        'yo': 0,
-        'tú': 1,
-        'él/ella/Ud.': 2,
-        'nosotros': 3,
-        'vosotros': 4,
-        'ellos/ellas/Uds.': 5
-      });
+  var ct, d, PRONOUNS, TENSES;
+
+  ct = {};
+  d = React.DOM;
+
+  // Maps pronoun -> index used in the verbs data
+  PRONOUNS = [
+    ['yo', 0],
+    ['tú', 1],
+    ['él/ella/Ud.', 2],
+    ['nosotros', 3],
+    ['vosotros', 4],
+    ['ellos/ellas/Uds.', 5]
+  ];
+
+  // Maps tense -> key used in the verbs data
+  TENSES = [
+    ["Indicative, present", "indicative/present"],
+    ["Indicative, preterite", "indicative/preterite"],
+    ["Indicative, future", "indicative/future"],
+    ["Indicative, conditional", "indicative/conditional"],
+    ["Indicative, imperfect", "indicative/imperfect"],
+    ["Imperative", "imperative/imperative"],
+    ["Subjunctive, present", "subjunctive/present"],
+    ["Subjunctive, imperfect", "subjunctive/imperfect"],
+    ["Subjunctive, imperfect 2", "subjunctive/imperfect-2"],
+    ["Subjunctive, future", "subjunctive/future"]
+  ];
 
   ct.verbs = Immutable.fromJS(conjthisVerbs);
 
@@ -25,21 +43,22 @@ define([
   };
 
   ct.createTask = function(verb){
-    var tense, pronoun, pronounText, pronounIdx, conjugations, conjugation, regularFlag, solution;
+    var tense, tenseId, tenseName, pronoun, pronounText, pronounIdx, conjugations, conjugation, regularFlag, solution;
 
-    tense = 'indicative/present';
+    tense = ct.randomEntry(TENSES);
+    tenseName = tense[0];
+    tenseId = tense[1];
 
-    pronoun = ct.randomKeyValue(PRONOUNS);
+    pronoun = ct.randomEntry(PRONOUNS);
     pronounText = pronoun[0];
     pronounIdx = pronoun[1];
 
-    conjugations = verb.getIn(['conjugations', tense]);
-    conjugation = conjugations.get(pronounIdx);
+    conjugation = verb.getIn(['conjugations', tenseId, pronounIdx]);
     regularFlag = conjugation.get(0);
     solution = conjugation.get(1);
 
     return new ct.Task({
-      display: verb.get('spanish') + ' (' + verb.get('english') + ')',
+      display: verb.get('spanish') + ' (' + verb.get('english') + ') ' + tenseName,
       prompt: pronounText,
       regularFlag: regularFlag,
       solution: solution
@@ -55,10 +74,8 @@ define([
       }
   };
 
-  ct.randomKeyValue = function(map){
-    var keys = map.flip().toArray(),
-        k = keys[Math.round(Math.random() * (keys.length - 1))];
-    return [k, map.get(k)];
+  ct.randomEntry = function(arr){
+    return arr[Math.round(Math.random() * (arr.length - 1))];
   };
 
   ct.ConjugatorTextInput = React.createClass({
@@ -188,9 +205,9 @@ define([
     }
   });
 
-  ct.ConjugatorForm = React.createClass({
+  ct.ExerciseForm = React.createClass({
 
-    displayName: 'ConjugatorForm',
+    displayName: 'ExerciseForm',
 
     getInitialState: function(){
       return {
@@ -201,10 +218,25 @@ define([
     render: function(){
       var statusMessage,
           stateName,
-          isIrregular;
+          isIrregular,
+          display,
+          task,
+          prompt;
 
+      task = this.props.as.get('task');
       stateName = this.props.as.get('stateName');
-      isIrregular = this.props.as.getIn(['task', 'regularFlag']) === 'i';
+
+      if(task === null){
+        isIrregular = false;
+        display = '';
+        prompt = '';
+
+      } else {
+        isIrregular = this.props.as.getIn(['task', 'regularFlag']) === 'i';
+        display = this.props.as.getIn(['task', 'display']);
+        prompt = this.props.as.getIn(['task', 'prompt']);
+      }
+
 
       if(stateName === 'solveTask'){
         statusMessage = d.div(
@@ -222,40 +254,29 @@ define([
           'The right answer is "' + this.props.as.getIn(['task', 'solution']) + '"')
 
       } else {
-        throw new Error('Unhandled stateName +"' + stateName + '"');
+        statusMessage = d.div({}, '');
       }
 
-      return d.div({},
-        d.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
-          d.div({className: 'container'},
-            d.span({className: 'navbar-brand'}, 'Conjugate this')
-          )
+
+      return d.div({className: 'panel panel-default'},
+        d.div({className: 'panel-heading', style: {textAlign: 'right'}},
+          d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
+          d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.as.get('streak')))
         ),
-        d.div({className: 'container'},
-
-          ct.SettingsForm(),
-
-          d.div({className: 'panel panel-default'},
-            d.div({className: 'panel-heading', style: {textAlign: 'right'}},
-              d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
-              d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.as.get('streak')))
-            ),
-            d.div({className: 'panel-body'},
-              d.h2({style: {margin: '0.75em 0'}}, this.props.as.getIn(['task', 'display'])),
-              d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
-                d.div({className: 'form-group' + (isIrregular ? ' has-warning has-feedback' : '')},
-                  d.div({className: 'input-group'},
-                    d.span({className: 'input-group-addon'},
-                      d.span({style: {display: 'inline-block', width: '90px'}}, this.props.as.getIn(['task', 'prompt']))
-                    ),
-                    ct.ConjugatorTextInput({key: 'conjugatorTextInput', ref: 'conjugatorTextInput', as: this.props.as}),
-                    d.span({className: 'glyphicon glyphicon-warning-sign form-control-feedback', style: {visibility: isIrregular ? 'visible': 'hidden'}})
-                  )
-                )
-              ),
-              statusMessage
+        d.div({className: 'panel-body'},
+          d.h2({style: {margin: '0.75em 0'}}, display),
+          d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
+            d.div({className: 'form-group' + (isIrregular ? ' has-warning has-feedback' : '')},
+              d.div({className: 'input-group'},
+                d.span({className: 'input-group-addon'},
+                  d.span({style: {display: 'inline-block', width: '90px'}}, prompt)
+                ),
+                ct.ConjugatorTextInput({key: 'conjugatorTextInput', ref: 'conjugatorTextInput', as: this.props.as}),
+                d.span({className: 'glyphicon glyphicon-warning-sign form-control-feedback', style: {visibility: isIrregular ? 'visible': 'hidden'}})
+              )
             )
-          )
+          ),
+          statusMessage
         )
       )
     },
@@ -302,41 +323,40 @@ define([
 
     displayName: 'SettingsForm',
 
-    tenses: [
-      "indicative/present",
-      "indicative/preterite",
-      "indicative/future",
-      "indicative/conditional",
-      "indicative/imperfect",
-      "imperative/imperative",
-      "subjunctive/present",
-      "subjunctive/imperfect",
-      "subjunctive/imperfect-2",
-      "subjunctive/future"
-    ],
-
     render: function(){
-
       var tenseCheckboxes, pronounCheckboxes;
 
-      tenseCheckboxes = this.tenses.map(function(tense){
-        return d.div({className: 'checkbox'},
+      tenseCheckboxes = TENSES.map(function(arr){
+        var tense = arr[0];
+
+        return d.div({className: 'checkbox', key: tense},
           d.label({},
-            d.input({type: 'checkbox'}),
+            d.input({
+              type: 'checkbox',
+              ref: tense,
+              checked: this.props.as.getIn(['tenses', tense]),
+              onChange: function(e){this.onTenseChange(e, tense)}.bind(this)
+            }),
             d.span({style: {verticalAlign: 'top'}}, tense)
           )
-        );
-      });
+        )
+      }, this);
 
-      pronounCheckboxes = [];
-      PRONOUNS.forEach(function(pronounIdx, pronoun){
-        pronounCheckboxes.push(d.div({className: 'checkbox'},
+      pronounCheckboxes = PRONOUNS.map(function(arr){
+        var pronoun = arr[0];
+
+        return d.div({className: 'checkbox', key: pronoun},
           d.label({},
-            d.input({type: 'checkbox'}),
+            d.input({
+              type: 'checkbox',
+              ref: pronoun,
+              checked: this.props.as.getIn(['pronouns', pronoun]),
+              onChange: function(e){this.onPronounChange(e, pronoun)}.bind(this)
+            }),
             d.span({style: {verticalAlign: 'top'}}, pronoun)
           )
-        ));
-      });
+        )
+      }, this);
 
       return d.div({className: 'panel panel-default'},
         d.div({className: 'panel-heading'}, 'Settings Form'),
@@ -363,11 +383,72 @@ define([
       );
     },
 
+    onTenseChange: function(e, tense){
+      this.getDOMNode().dispatchEvent(
+        new CustomEvent('command', {
+          detail: {
+            type: 'updateTenses',
+            key: tense,
+            value: e.target.checked
+          },
+          bubbles: true,
+          cancelable: false
+        })
+      );
+    },
+
+    onPronounChange: function(e, pronoun){
+      this.getDOMNode().dispatchEvent(
+        new CustomEvent('command', {
+          detail: {
+            type: 'updatePronouns',
+            key: pronoun,
+            value: e.target.checked
+          },
+          bubbles: true,
+          cancelable: false
+        })
+      );
+    },
+
+    /**
+     * On submit, start the exercise.
+     * @param e
+     */
     onSubmit: function(e){
-      alert('Submit!');
       e.preventDefault();
+
+      this.getDOMNode().dispatchEvent(
+        new CustomEvent('command', {
+          detail: {
+            type: 'startExercise'
+          },
+          bubbles: true,
+          cancelable: false
+        })
+      );
     }
   });
+
+
+  ct.ConjugatorMain = React.createClass({
+    displayName: 'ConjugatorMain',
+    render: function(){
+      return d.div({},
+        d.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
+          d.div({className: 'container'},
+            d.span({className: 'navbar-brand'}, 'Conjugate this')
+          )
+        ),
+        d.div({className: 'container'},
+          ct.SettingsForm({as: this.props.as}),
+          ct.ExerciseForm({as: this.props.as})
+        )
+      )
+    }
+  });
+
+
 
   /**
    * A translation/conjugation task.
@@ -390,7 +471,9 @@ define([
     correct: 0,
     attempted: 0,
     streak: 0,
-    answer: ''
+    answer: '',
+    pronouns: {},
+    tenses: {}
   });
 
   /**
@@ -405,37 +488,76 @@ define([
    * @returns {*}
    */
   ct.nextState = function(appState, message, taskIterator){
-    var isCorrect;
+    var isCorrect, obj, initialPronouns, initialTenses;
 
     if(!appState){
+
+      initialPronouns = {};
+      PRONOUNS.forEach(function(p){
+        initialPronouns[p[0]] = true;
+      }, this);
+      initialPronouns = Immutable.fromJS(initialPronouns);
+
+      initialTenses = {};
+      TENSES.forEach(function(t){
+        initialTenses[t[0]] = true;
+      }, this);
+      initialTenses = Immutable.fromJS(initialTenses);
+
       return new ct.AppState({
-        task: taskIterator.next(),
-        stateName: 'solveTask'
+        task: null,
+        stateName: 'configureExercise',
+        pronouns: initialPronouns,
+        tenses: initialTenses
       });
     }
 
-    else if(message.type === 'submit'){
-      isCorrect = appState.answer === appState.task.solution;
-      return appState.mergeDeep({
-        stateName: isCorrect ? 'taskCorrect' : 'taskIncorrect',
-        correct: isCorrect ? appState.correct + 1 : appState.correct,
-        attempted: appState.attempted + 1,
-        streak: isCorrect ? appState.streak + 1 : 0
-      });
+    if(appState.stateName === 'configureExercise'){
+      if(message.type === 'updateTenses'){
+        obj = {tenses: {}};
+        obj.tenses[message.key] = message.value;
+        return appState.mergeDeep(obj);
+      }
+      if(message.type === 'updatePronouns'){
+        obj = {pronouns: {}};
+        obj.pronouns[message.key] = message.value;
+        return appState.mergeDeep(obj);
+      }
+      if(message.type === 'startExercise'){
+        return appState.mergeDeep({
+          stateName: 'solveTask',
+          task: taskIterator.next(),
+          answer: ''
+        });
+      }
     }
 
-    if(message.type === 'next'){
-      return appState.mergeDeep({
-        stateName: 'solveTask',
-        task: taskIterator.next(),
-        answer: ''
-      })
+    if(appState.stateName === 'solveTask'){
+      if(message.type === 'submit'){
+        isCorrect = appState.answer === appState.task.solution;
+        return appState.mergeDeep({
+          stateName: isCorrect ? 'taskCorrect' : 'taskIncorrect',
+          correct: isCorrect ? appState.correct + 1 : appState.correct,
+          attempted: appState.attempted + 1,
+          streak: isCorrect ? appState.streak + 1 : 0
+        });
+      }
+
+      else if(message.type === 'setAnswer'){
+        return appState.mergeDeep({
+          answer: message.value
+        });
+      }
     }
 
-    else if(message.type === 'setAnswer'){
-      return appState.mergeDeep({
-        answer: message.value
-      });
+    if(['solveTask', 'taskCorrect', 'taskIncorrect'].indexOf(appState.stateName) >= 0){
+      if(message.type === 'next'){
+        return appState.mergeDeep({
+          stateName: 'solveTask',
+          task: taskIterator.next(),
+          answer: ''
+        })
+      }
     }
 
     else {
@@ -452,8 +574,9 @@ define([
   ct.ConjugateThis = function(){
     this.el = document.createElement('div');
     this.appState = ct.nextState(null, null, ct.taskIterator);
+
     this.component = React.renderComponent(
-        ct.ConjugatorForm({as: this.appState}), this.el);
+        ct.ConjugatorMain({as: this.appState}), this.el);
     this.bus = new Bacon.Bus();
 
     this.commandStream = Bacon.fromEventTarget(this.el, "command", function(event){
