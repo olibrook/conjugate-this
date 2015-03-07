@@ -13,17 +13,17 @@ define([
   d = React.DOM;
 
   // Maps pronoun -> index used in the verbs data
-  PRONOUNS = [
+  PRONOUNS = Immutable.OrderedMap([
     ['yo', 0],
     ['tú', 1],
     ['él/ella/Ud.', 2],
     ['nosotros', 3],
     ['vosotros', 4],
     ['ellos/ellas/Uds.', 5]
-  ];
+  ]);
 
   // Maps tense -> key used in the verbs data
-  TENSES = [
+  TENSES = Immutable.OrderedMap([
     ["Indicative, present", "indicative/present"],
     ["Indicative, preterite", "indicative/preterite"],
     ["Indicative, future", "indicative/future"],
@@ -34,7 +34,7 @@ define([
     ["Subjunctive, imperfect", "subjunctive/imperfect"],
     ["Subjunctive, imperfect 2", "subjunctive/imperfect-2"],
     ["Subjunctive, future", "subjunctive/future"]
-  ];
+  ]);
 
   ct.verbs = Immutable.fromJS(conjthisVerbs);
 
@@ -42,24 +42,55 @@ define([
     return arr.get(Math.round(Math.random() * (arr.length - 1)));
   };
 
-  ct.createTask = function(verb, appState){
-    var tense, tenseId, tenseName, pronoun, pronounText, pronounIdx, conjugations, conjugation, regularFlag, solution;
+  /**
+   * Selects a tense, given the current app state.
+   */
+  ct.getTense = function(appState){
+    var activeTenses, tense, tenseName;
 
-    tense = ct.randomEntry(TENSES);
+    activeTenses = appState.get('tenses').filter(function(isActive){
+      return isActive;
+    });
+    tense = ct.randomEntry(activeTenses);
     tenseName = tense[0];
-    tenseId = tense[1];
+    return tenseName;
+  };
 
-    pronoun = ct.randomEntry(PRONOUNS);
-    pronounText = pronoun[0];
-    pronounIdx = pronoun[1];
+  /**
+   * Selects a pronoun, given the current app state.
+   */
+  ct.getPronoun = function(appState){
+    var activePronouns, pronoun, pronounName;
+
+    activePronouns = appState.get('pronouns').filter(function(isActive){
+      return isActive;
+    });
+    pronoun = ct.randomEntry(activePronouns);
+    pronounName = pronoun[0];
+    return pronounName;
+  };
+
+  /**
+   * TODO: This is not a pure function - uses Math.random. Maybe cleaner
+   * to pass in an iterator over a pre-randomized sequence of pronouns/tenses?
+   */
+  ct.createTask = function(verb, appState){
+    var tense, tenseId, pronoun, pronounIdx, conjugations,
+        conjugation, regularFlag, solution;
+
+    tense = ct.getTense(appState);
+    tenseId = TENSES.get(tense);
+
+    pronoun = ct.getPronoun(appState);
+    pronounIdx = PRONOUNS.get(pronoun);
 
     conjugation = verb.getIn(['conjugations', tenseId, pronounIdx]);
     regularFlag = conjugation.get(0);
     solution = conjugation.get(1);
 
     return new ct.Task({
-      display: verb.get('spanish') + ' (' + verb.get('english') + ') ' + tenseName,
-      prompt: pronounText,
+      display: verb.get('spanish') + ' (' + verb.get('english') + ') ' + tense,
+      prompt: pronoun,
       regularFlag: regularFlag,
       solution: solution
     });
@@ -69,8 +100,10 @@ define([
     return ct.createTask(ct.choose(ct.verbs), appState);
   };
 
-  ct.randomEntry = function(arr){
-    return arr[Math.round(Math.random() * (arr.length - 1))];
+  ct.randomEntry = function(map){
+    var keys = map.keySeq().toArray(),
+        randomKey = keys[Math.round(Math.random() * (keys.length - 1))];
+    return [randomKey, map.get(randomKey)];
   };
 
   ct.ConjugatorTextInput = React.createClass({
@@ -321,9 +354,7 @@ define([
     render: function(){
       var tenseCheckboxes, pronounCheckboxes;
 
-      tenseCheckboxes = TENSES.map(function(arr){
-        var tense = arr[0];
-
+      tenseCheckboxes = TENSES.map(function(tenseId, tense){
         return d.div({className: 'checkbox', key: tense},
           d.label({},
             d.input({
@@ -335,11 +366,9 @@ define([
             d.span({style: {verticalAlign: 'top'}}, tense)
           )
         )
-      }, this);
+      }, this).valueSeq().toArray();
 
-      pronounCheckboxes = PRONOUNS.map(function(arr){
-        var pronoun = arr[0];
-
+      pronounCheckboxes = PRONOUNS.map(function(pronounIdx, pronoun){
         return d.div({className: 'checkbox', key: pronoun},
           d.label({},
             d.input({
@@ -351,7 +380,7 @@ define([
             d.span({style: {verticalAlign: 'top'}}, pronoun)
           )
         )
-      }, this);
+      }, this).valueSeq().toArray();
 
       return d.div({className: 'panel panel-default'},
         d.div({className: 'panel-heading'}, 'Settings Form'),
@@ -483,27 +512,18 @@ define([
    * @returns {*}
    */
   ct.nextState = function(appState, message, nextTask){
-    var isCorrect, obj, initialPronouns, initialTenses;
+    var isCorrect, obj;
 
     if(!appState){
-
-      initialPronouns = {};
-      PRONOUNS.forEach(function(p){
-        initialPronouns[p[0]] = true;
-      }, this);
-      initialPronouns = Immutable.fromJS(initialPronouns);
-
-      initialTenses = {};
-      TENSES.forEach(function(t){
-        initialTenses[t[0]] = true;
-      }, this);
-      initialTenses = Immutable.fromJS(initialTenses);
-
       return new ct.AppState({
         task: null,
         stateName: 'configureExercise',
-        pronouns: initialPronouns,
-        tenses: initialTenses
+        pronouns: PRONOUNS.map(function(){
+          return true;
+        }).toMap(),
+        tenses: TENSES.map(function(){
+          return true;
+        }).toMap()
       });
     }
 
