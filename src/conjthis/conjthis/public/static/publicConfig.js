@@ -8,7 +8,9 @@ require.config({
     Immutable: 'public/lib/immutable/dist/Immutable',
 
     conjthisMain: 'public/src/js/conjthisMain',
-    conjthisVerbs: 'public/src/js/conjthisVerbs'
+    conjthisVerbs: 'public/src/js/conjthisVerbs',
+    conjthisViews: 'public/src/js/conjthisViews',
+    conjthisConstants: 'public/src/js/conjthisConstants'
   }
 });
 
