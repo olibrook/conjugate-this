@@ -148,7 +148,8 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
           isIrregular,
           display,
           task,
-          prompt;
+          pronoun,
+          tense;
 
       task = this.props.as.get('task');
       stateName = this.props.as.get('stateName');
@@ -156,12 +157,14 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
       if(task === null){
         isIrregular = false;
         display = '';
-        prompt = '';
+        pronoun = '';
+        tense = '';
 
       } else {
         isIrregular = this.props.as.getIn(['task', 'regularFlag']) === 'i';
         display = this.props.as.getIn(['task', 'display']);
-        prompt = this.props.as.getIn(['task', 'prompt']);
+        pronoun = this.props.as.getIn(['task', 'pronoun']);
+        tense = this.props.as.getIn(['task', 'tense']);
       }
 
 
@@ -185,9 +188,14 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
       }
 
       return d.div({className: 'panel panel-default'},
-        d.div({className: 'panel-heading', style: {textAlign: 'right'}},
-          d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
-          d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.as.get('streak')))
+        d.div({className: 'panel-heading clearfix'},
+          d.div({className: 'pull-left'},
+            tense
+          ),
+          d.div({className: 'pull-right'},
+            d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
+            d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.as.get('streak')))
+          )
         ),
         d.div({className: 'panel-body'},
           d.h2({style: {margin: '0.75em 0'}}, display),
@@ -195,7 +203,7 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
             d.div({className: 'form-group' + (isIrregular ? ' has-warning has-feedback' : '')},
               d.div({className: 'input-group'},
                 d.span({className: 'input-group-addon'},
-                  d.span({style: {display: 'inline-block', width: '90px'}}, prompt)
+                  d.span({style: {display: 'inline-block', width: '90px'}}, pronoun)
                 ),
                 ctViews.ConjugatorTextInput({key: 'conjugatorTextInput', ref: 'conjugatorTextInput', as: this.props.as}),
                 d.span({className: 'glyphicon glyphicon-warning-sign form-control-feedback', style: {visibility: isIrregular ? 'visible': 'hidden'}})

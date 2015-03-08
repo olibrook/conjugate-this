@@ -13,8 +13,11 @@ define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants){
     // Exercise as displayed to the user
     display: '',
 
-    // Typically a pronoun, eg. conjugation this for "yo"
-    prompt: '',
+    // The pronoun of the conjugation for this task
+    pronoun: '',
+
+    // The tense required for this task
+    tense: '',
 
     // The correct solution the the current task
     solution: '',
@@ -45,7 +48,7 @@ define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants){
     streak: 0,
 
     // Number of tasks in the exercise
-    numToAttempt: 5,
+    numToAttempt: 20,
 
     // The task answer as typed by the user
     answer: '',

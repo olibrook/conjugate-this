@@ -64,8 +64,9 @@ define([
     solution = conjugation.get(1);
 
     return new ctRecords.Task({
-      display: verb.get('spanish') + ' (' + verb.get('english') + ') ' + tense,
-      prompt: pronoun,
+      display: verb.get('spanish') + ' (' + verb.get('english') + ') ',
+      pronoun: pronoun,
+      tense: tense,
       regularFlag: regularFlag,
       solution: solution
     });
