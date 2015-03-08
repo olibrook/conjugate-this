@@ -352,25 +352,6 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
     }
   });
 
-
-  ctViews.ConjugatorMain = React.createClass({
-    displayName: 'ConjugatorMain',
-    render: function(){
-      return d.div({},
-        d.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
-          d.div({className: 'container'},
-            d.span({className: 'navbar-brand'}, 'Conjugate this')
-          )
-        ),
-        d.div({className: 'container'},
-          ctViews.SettingsForm({as: this.props.as}),
-          ctViews.ExerciseForm({as: this.props.as}),
-          ctViews.ResultsView({as: this.props.as})
-        )
-      )
-    }
-  });
-
   ctViews.ResultsView = React.createClass({
 
     displayName: 'ResultsView',
@@ -404,6 +385,50 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
       );
     }
   });
+
+
+  ctViews.ConjugatorMain = React.createClass({
+
+    displayName: 'ConjugatorMain',
+
+    render: function(){
+      return d.div({},
+        d.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
+          d.div({className: 'container'},
+            d.span({className: 'navbar-brand'}, 'Conjugate this')
+          )
+        ),
+        d.div({className: 'slider' , ref: 'slider'},
+          d.div({className: 'inner ' + this.props.as.get('stateName')},
+            d.div({className: 'slide'}, d.div({className: 'container'}, ctViews.SettingsForm({as: this.props.as}))),
+            d.div({className: 'slide'}, d.div({className: 'container'}, ctViews.ExerciseForm({as: this.props.as}))),
+            d.div({className: 'slide'}, d.div({className: 'container'}, ctViews.ResultsView({as: this.props.as})))
+          )
+        )
+      )
+    },
+
+    componentDidMount: function(){
+      this.fixScroll();
+    },
+
+    componentDidUpdate: function(){
+      this.fixScroll();
+    },
+
+    /**
+     * TODO: React bug, or am I doing something wrong?
+     * Seems to set scrollLeft when there is overflowing content
+     * even when "overflow-x: hidden" used in the CSS.
+     */
+    fixScroll: function(){
+      var domNode = this.refs.slider.getDOMNode();
+      setTimeout(function(){
+        domNode.scrollLeft = 0;
+      }, 40);
+    }
+  });
+
 
   return ctViews;
 

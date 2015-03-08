@@ -1,5 +1,5 @@
-// TODO: Make it so that there are 20 questions in an exercise.
 // TODO: Add a 'finished' state with a results screen.
+// TODO: Arrange panels side by side and animate them in. Somehow.
 
 define([
     'React',
