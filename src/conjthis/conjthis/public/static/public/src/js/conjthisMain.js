@@ -1,5 +1,4 @@
 // TODO: Add a 'finished' state with a results screen.
-// TODO: Arrange panels side by side and animate them in. Somehow.
 
 define([
     'React',
@@ -29,14 +28,7 @@ define([
    * Selects a tense, given the current app state.
    */
   ctMain.getTense = function(appState){
-    var activeTenses, tense, tenseName;
-
-    activeTenses = appState.get('tenses').filter(function(isActive){
-      return isActive;
-    });
-    tense = ctMain.randomEntry(activeTenses);
-    tenseName = tense[0];
-    return tenseName;
+    return appState.get('tense');
   };
 
   /**
@@ -105,14 +97,13 @@ define([
     var isCorrect, obj, as;
 
     if(!appState){
+      console.log((new ctRecords.AppState).toJSON());
       return new ctRecords.AppState();
     }
 
     if(appState.stateName === 'configureExercise'){
-      if(message.type === 'updateTenses'){
-        obj = {tenses: {}};
-        obj.tenses[message.key] = message.value;
-        return appState.mergeDeep(obj);
+      if(message.type === 'setTense'){
+        return appState.mergeDeep({tense: message.value});
       }
       if(message.type === 'updatePronouns'){
         obj = {pronouns: {}};

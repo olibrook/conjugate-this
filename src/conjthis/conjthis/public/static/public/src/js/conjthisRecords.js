@@ -55,10 +55,8 @@ define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants){
       return true;
     }).toMap(),
 
-    // Tenses active on the exercise
-    tenses: ctConstants.TENSES.map(function(){
-      return true;
-    }).toMap()
+    // Tense active for the exercise
+    tense: ctConstants.TENSES.keySeq().first()
   });
 
   return ctRecords;

@@ -253,12 +253,13 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
       var tenseCheckboxes, pronounCheckboxes;
 
       tenseCheckboxes = ctConstants.TENSES.map(function(tenseId, tense){
-        return d.div({className: 'checkbox', key: tense},
+        return d.div({className: 'radio', key: tense},
           d.label({},
             d.input({
-              type: 'checkbox',
+              type: 'radio',
+              name: 'tenseOptions',
               ref: tense,
-              checked: this.props.as.getIn(['tenses', tense]),
+              checked: this.props.as.getIn(['tense']) === tense,
               onChange: function(e){this.onTenseChange(e, tense)}.bind(this)
             }),
             d.span({style: {verticalAlign: 'top'}}, tense)
@@ -309,9 +310,8 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
       this.getDOMNode().dispatchEvent(
         new CustomEvent('command', {
           detail: {
-            type: 'updateTenses',
-            key: tense,
-            value: e.target.checked
+            type: 'setTense',
+            value: tense
           },
           bubbles: true,
           cancelable: false
