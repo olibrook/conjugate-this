@@ -1105,10 +1105,6 @@ define([], function() {
     "spanish": "peinar",
     "english": "to comb, to brush"
   }, {
-    "conjugations": {},
-    "spanish": "quejarse",
-    "english": "to complain, to moan"
-  }, {
     "conjugations": {
       "indicative/conditional": [
         ["r", "tosería"],

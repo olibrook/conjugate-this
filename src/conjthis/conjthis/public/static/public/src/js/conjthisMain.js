@@ -10,13 +10,15 @@ define([
 
   'use strict';
 
-  var ctMain;
-
-  ctMain = {};
+  var ctMain = {};
 
   ctMain.verbs = Immutable.fromJS(ctVerbs);
 
-  ctMain.choose = function(arr){
+  /**
+   * Choose the next verb to practice.
+   * TODO: Currently random. Spaced repetition would be cool.
+   */
+  ctMain.chooseVerb = function(arr){
     return arr.get(Math.round(Math.random() * (arr.length - 1)));
   };
 
@@ -75,7 +77,7 @@ define([
   };
 
   ctMain.nextTask = function(appState){
-    return ctMain.createTask(ctMain.choose(ctMain.verbs), appState);
+    return ctMain.createTask(ctMain.chooseVerb(ctMain.verbs), appState);
   };
 
   ctMain.randomEntry = function(map){
@@ -141,8 +143,8 @@ define([
       }
     }
 
-    if(['solveTask', 'taskCorrect', 'taskIncorrect'].indexOf(appState.stateName) >= 0){
-      if(message.type === 'next'){
+    if(['taskCorrect', 'taskIncorrect'].indexOf(appState.stateName) >= 0){
+      if(message.type === 'submit'){
         return appState.mergeDeep({
           stateName: 'solveTask',
           task: nextTask(appState),

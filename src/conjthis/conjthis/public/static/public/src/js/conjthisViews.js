@@ -224,7 +224,7 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
       this.getDOMNode().dispatchEvent(
         new CustomEvent('command', {
           detail: {
-            type: this.props.as.get('stateName') === 'solveTask' ? 'submit' : 'next'
+            type: 'submit'
           },
           bubbles: true,
           cancelable: false
