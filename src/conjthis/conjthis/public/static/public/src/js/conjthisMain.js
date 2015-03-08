@@ -1,3 +1,6 @@
+// TODO: Make it so that there are 20 questions in an exercise.
+// TODO: Add a 'finished' state with a results screen.
+
 define([
     'React',
     'Bacon',
@@ -99,7 +102,7 @@ define([
    * @returns {*}
    */
   ctMain.nextState = function(appState, message, nextTask){
-    var isCorrect, obj;
+    var isCorrect, obj, as;
 
     if(!appState){
       return new ctRecords.AppState();
@@ -145,17 +148,41 @@ define([
 
     if(['taskCorrect', 'taskIncorrect'].indexOf(appState.stateName) >= 0){
       if(message.type === 'submit'){
-        return appState.mergeDeep({
-          stateName: 'solveTask',
-          task: nextTask(appState),
-          answer: ''
-        })
+        if(appState.attempted === appState.numToAttempt){
+          as = appState.mergeDeep({
+            stateName: 'exerciseFinished',
+            answer: ''
+          });
+          // Doesn't look like you can set to null with mergeDeep.
+          as = as.set('task', null);
+          return as;
+        } else {
+          return appState.mergeDeep({
+            stateName: 'solveTask',
+            task: nextTask(appState),
+            answer: ''
+          });
+        }
       }
     }
 
-    else {
-      throw new Error('Unhandled message type: "' + message.type + '"');
+    if(appState.stateName === 'exerciseFinished'){
+      if(message.type === 'startAgain'){
+        return appState.mergeDeep({
+          stateName: 'configureExercise',
+          attempted: 0,
+          correct: 0,
+          streak: 0,
+          answer: ''
+        });
+      }
     }
+
+    console.log(
+        'Unhandled message: stateName: "' + appState.stateName
+            + '" type: "' + message.type + '". Ignoring.');
+
+    return appState; // Unmodified
   };
 
   /**

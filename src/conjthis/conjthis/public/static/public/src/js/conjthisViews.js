@@ -184,7 +184,6 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
         statusMessage = d.div({}, '');
       }
 
-
       return d.div({className: 'panel panel-default'},
         d.div({className: 'panel-heading', style: {textAlign: 'right'}},
           d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
@@ -365,9 +364,44 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
         ),
         d.div({className: 'container'},
           ctViews.SettingsForm({as: this.props.as}),
-          ctViews.ExerciseForm({as: this.props.as})
+          ctViews.ExerciseForm({as: this.props.as}),
+          ctViews.ResultsView({as: this.props.as})
         )
       )
+    }
+  });
+
+  ctViews.ResultsView = React.createClass({
+
+    displayName: 'ResultsView',
+
+    render: function(){
+      var content;
+
+      if(this.props.as.get('stateName') === 'exerciseFinished'){
+        content = d.div({},
+          d.h3({}, 'Exercise complete'),
+          d.button({className: 'btn btn-primary', onClick: this.onStartAgainClick}, 'Start again'));
+      } else {
+        content = d.div({}, '');
+      }
+
+      return d.div({className: 'panel panel-default'},
+        d.div({className: 'panel-heading'}, 'Results'),
+        d.div({className: 'panel-body'}, content)
+      );
+    },
+
+    onStartAgainClick: function(e){
+      this.getDOMNode().dispatchEvent(
+        new CustomEvent('command', {
+          detail: {
+            type: 'startAgain'
+          },
+          bubbles: true,
+          cancelable: false
+        })
+      );
     }
   });
 
