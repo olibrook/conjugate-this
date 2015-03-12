@@ -193,8 +193,7 @@ define(['React', 'conjthisConstants'], function(React, ctConstants){
             tense
           ),
           d.div({className: 'pull-right'},
-            d.span({}, 'Total ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted'))),
-            d.span({}, ' Streak ', d.span({className: 'badge'}, this.props.as.get('streak')))
+            d.span({}, 'Score ', d.span({className: 'badge'}, this.props.as.get('correct') + ' / ' + this.props.as.get('attempted')))
           )
         ),
         d.div({className: 'panel-body'},

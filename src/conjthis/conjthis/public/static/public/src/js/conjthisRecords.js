@@ -44,9 +44,6 @@ define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants){
     // Number attempted
     attempted: 0,
 
-    // Streak of correct answers
-    streak: 0,
-
     // Number of tasks in the exercise
     numToAttempt: 20,
 

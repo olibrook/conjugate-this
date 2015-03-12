@@ -7819,5 +7819,177 @@ define([], function() {
     },
     "spanish": "escribir",
     "english": "to write"
+  },
+  {
+    "conjugations": {
+      "indicative/present": [
+        ["i", "soy"],
+        ["i", "eres"],
+        ["i", "es"],
+        ["i", "somos"],
+        ["i", "sois"],
+        ["i", "son"]
+      ],
+      "indicative/conditional": [
+        ["r", "ser\u00eda"],
+        ["r", "ser\u00edas"],
+        ["r", "ser\u00eda"],
+        ["r", "ser\u00edamos"],
+        ["r", "ser\u00edais"],
+        ["r", "ser\u00edan"]
+      ],
+      "imperative/imperative": [
+        ["r", "-"],
+        ["i", "s\u00e9"],
+        ["i", "sea"],
+        ["i", "seamos"],
+        ["r", "sed"],
+        ["i", "sean"]
+      ],
+      "indicative/imperfect": [
+        ["i", "era"],
+        ["i", "eras"],
+        ["i", "era"],
+        ["i", "\u00e9ramos"],
+        ["i", "erais"],
+        ["i", "eran"]
+      ],
+      "subjunctive/present": [
+        ["i", "sea"],
+        ["i", "seas"],
+        ["i", "sea"],
+        ["i", "seamos"],
+        ["i", "se\u00e1is"],
+        ["i", "sean"]
+      ],
+      "indicative/future": [
+        ["r", "ser\u00e9"],
+        ["r", "ser\u00e1s"],
+        ["r", "ser\u00e1"],
+        ["r", "seremos"],
+        ["r", "ser\u00e9is"],
+        ["r", "ser\u00e1n"]
+      ],
+      "subjunctive/imperfect": [
+        ["i", "fuera"],
+        ["i", "fueras"],
+        ["i", "fuera"],
+        ["i", "fu\u00e9ramos"],
+        ["i", "fuerais"],
+        ["i", "fueran"]
+      ],
+      "subjunctive/imperfect-2": [
+        ["i", "fuese"],
+        ["i", "fueses"],
+        ["i", "fuese"],
+        ["i", "fu\u00e9semos"],
+        ["i", "fueseis"],
+        ["i", "fuesen"]
+      ],
+      "subjunctive/future": [
+        ["i", "fuere"],
+        ["i", "fueres"],
+        ["i", "fuere"],
+        ["i", "fu\u00e9remos"],
+        ["i", "fuereis"],
+        ["i", "fueren"]
+      ],
+      "indicative/preterite": [
+        ["i", "fui"],
+        ["i", "fuiste"],
+        ["i", "fue"],
+        ["i", "fuimos"],
+        ["i", "fuisteis"],
+        ["i", "fueron"]
+      ]
+    },
+    "spanish": "ser",
+    "english": "to be"
+  },
+  {
+    "conjugations": {
+      "indicative/present": [
+        ["i", "estoy"],
+        ["i", "est\u00e1s"],
+        ["i", "est\u00e1"],
+        ["r", "estamos"],
+        ["r", "est\u00e1is"],
+        ["i", "est\u00e1n"]
+      ],
+      "indicative/conditional": [
+        ["r", "estar\u00eda"],
+        ["r", "estar\u00edas"],
+        ["r", "estar\u00eda"],
+        ["r", "estar\u00edamos"],
+        ["r", "estar\u00edais"],
+        ["r", "estar\u00edan"]
+      ],
+      "imperative/imperative": [
+        ["r", "-"],
+        ["i", "est\u00e1"],
+        ["i", "est\u00e9"],
+        ["r", "estemos"],
+        ["r", "estad"],
+        ["i", "est\u00e9n"]
+      ],
+      "indicative/imperfect": [
+        ["r", "estaba"],
+        ["r", "estabas"],
+        ["r", "estaba"],
+        ["r", "est\u00e1bamos"],
+        ["r", "estabais"],
+        ["r", "estaban"]
+      ],
+      "subjunctive/present": [
+        ["i", "est\u00e9"],
+        ["i", "est\u00e9s"],
+        ["i", "est\u00e9"],
+        ["r", "estemos"],
+        ["r", "est\u00e9is"],
+        ["i", "est\u00e9n"]
+      ],
+      "indicative/future": [
+        ["r", "estar\u00e9"],
+        ["r", "estar\u00e1s"],
+        ["r", "estar\u00e1"],
+        ["r", "estaremos"],
+        ["r", "estar\u00e9is"],
+        ["r", "estar\u00e1n"]
+      ],
+      "subjunctive/imperfect": [
+        ["i", "estuviera"],
+        ["i", "estuvieras"],
+        ["i", "estuviera"],
+        ["i", "estuvi\u00e9ramos"],
+        ["i", "estuvierais"],
+        ["i", "estuvieran"]
+      ],
+      "subjunctive/imperfect-2": [
+        ["i", "estuviese"],
+        ["i", "estuvieses"],
+        ["i", "estuviese"],
+        ["i", "estuvi\u00e9semos"],
+        ["i", "estuvieseis"],
+        ["i", "estuviesen"]
+      ],
+      "subjunctive/future": [
+        ["i", "estuviere"],
+        ["i", "estuvieres"],
+        ["i", "estuviere"],
+        ["i", "estuvi\u00e9remos"],
+        ["i", "estuviereis"],
+        ["i", "estuvieren"]
+      ],
+      "indicative/preterite": [
+        ["i", "estuve"],
+        ["i", "estuviste"],
+        ["i", "estuvo"],
+        ["i", "estuvimos"],
+        ["i", "estuvisteis"],
+        ["i", "estuvieron"]
+      ]
+    },
+    "spanish": "estar",
+    "english": "to be"
   }];
 });

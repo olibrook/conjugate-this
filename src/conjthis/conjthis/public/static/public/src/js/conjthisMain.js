@@ -126,8 +126,7 @@ define([
         return appState.mergeDeep({
           stateName: isCorrect ? 'taskCorrect' : 'taskIncorrect',
           correct: isCorrect ? appState.correct + 1 : appState.correct,
-          attempted: appState.attempted + 1,
-          streak: isCorrect ? appState.streak + 1 : 0
+          attempted: appState.attempted + 1
         });
       }
 
@@ -164,7 +163,6 @@ define([
           stateName: 'configureExercise',
           attempted: 0,
           correct: 0,
-          streak: 0,
           answer: ''
         });
       }
