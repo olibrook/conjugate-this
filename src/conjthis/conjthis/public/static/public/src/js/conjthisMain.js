@@ -1,4 +1,12 @@
 // TODO: Add a 'finished' state with a results screen.
+// TODO: Plan for spaced repetition:
+//   - Each tense gets a queue of verb names
+//   - As a verb is completed, it is marked as correct or incorrect.
+//   - Correctly completed verbs go to the back of the queue, incorrect further
+//     to the front.
+//   - When picking the next verb for a task, always pick from the front of
+//     the queue.
+// TODO: Remove the task record. Totally unnecessary.
 
 define([
     'React',
@@ -7,79 +15,52 @@ define([
     'conjthisVerbs',
     'conjthisViews',
     'conjthisConstants',
-    'conjthisRecords'
-], function(React, Bacon, Immutable, ctVerbs, ctViews, ctConstants, ctRecords) {
+    'conjthisRecords',
+    'conjthisUtils'
+], function(React, Bacon, Immutable, ctVerbs, ctViews, ctConstants, ctRecords, ctUtils) {
 
   'use strict';
 
   var ctMain = {};
-
-  ctMain.verbs = Immutable.fromJS(ctVerbs);
 
   /**
    * Choose the next verb to practice.
    * TODO: Currently random. Spaced repetition would be cool.
    */
   ctMain.chooseVerb = function(arr){
-    return arr.get(Math.round(Math.random() * (arr.length - 1)));
+    return arr[Math.round(Math.random() * (arr.length - 1))];
   };
 
-  /**
-   * Selects a tense, given the current app state.
-   */
-  ctMain.getTense = function(appState){
-    return appState.get('tense');
-  };
-
-  /**
-   * Selects a pronoun, given the current app state.
-   */
-  ctMain.getPronoun = function(appState){
-    var activePronouns, pronoun, pronounName;
-
-    activePronouns = appState.get('pronouns').filter(function(isActive){
-      return isActive;
-    });
-    pronoun = ctMain.randomEntry(activePronouns);
-    pronounName = pronoun[0];
-    return pronounName;
-  };
-
-  /**
-   * TODO: This is not a pure function - uses Math.random. Maybe cleaner
-   * to pass in an iterator over a pre-randomized sequence of pronouns/tenses?
-   */
   ctMain.createTask = function(verb, appState){
-    var tense, tenseId, pronoun, pronounIdx, conjugations,
-        conjugation, regularFlag, solution;
-
-    tense = ctMain.getTense(appState);
-    tenseId = ctConstants.TENSES.get(tense);
-
-    pronoun = ctMain.getPronoun(appState);
-    pronounIdx = ctConstants.PRONOUNS.get(pronoun);
-
-    conjugation = verb.getIn(['conjugations', tenseId, pronounIdx]);
-    regularFlag = conjugation.get(0);
-    solution = conjugation.get(1);
-
     return new ctRecords.Task({
-      display: verb.get('spanish') + ' (' + verb.get('english') + ') ',
-      pronoun: pronoun,
-      tense: tense,
-      regularFlag: regularFlag,
-      solution: solution
+      tense: appState.get('tense'),
+      verb: Immutable.fromJS(verb)
     });
   };
 
   ctMain.nextTask = function(appState){
-    return ctMain.createTask(ctMain.chooseVerb(ctMain.verbs), appState);
+    return ctMain.createTask(ctMain.chooseVerb(ctVerbs), appState);
   };
 
   ctMain.randomEntry = function(map){
     var keys = map.keySeq().toArray(),
         randomKey = keys[Math.round(Math.random() * (keys.length - 1))];
     return [randomKey, map.get(randomKey)];
+  };
+
+
+  // TODO: Obviously shit.
+  ctMain.arraysEqual = function(arr1, arr2) {
+    var i;
+    if(arr1.length !== arr2.length){
+
+    }
+    for(i = 0; i < arr1.length; i += 1) {
+      if(arr1[i] !== arr2[i]){
+        return false;
+      }
+    }
+    return true;
   };
 
 
@@ -95,7 +76,7 @@ define([
    * @returns {*}
    */
   ctMain.nextState = function(appState, message, nextTask){
-    var isCorrect, obj, as;
+    var obj, as;
 
     if(!appState){
       console.log((new ctRecords.AppState).toJSON());
@@ -115,34 +96,61 @@ define([
         return appState.mergeDeep({
           stateName: 'solveTask',
           task: nextTask(appState),
-          answer: ''
+          answers: ctConstants.INITIAL_ANSWERS,
+          answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
         });
       }
     }
 
     if(appState.stateName === 'solveTask'){
       if(message.type === 'submit'){
-        isCorrect = appState.answer === appState.task.solution;
+
+        var tenseKey = ctConstants.TENSES.get(appState.get('tense'));
+
+        var solutions = appState.getIn(
+          ['task', 'verb', 'conjugations', tenseKey]
+        ).map(function(val){
+            return val.get(1)
+        }).toArray();
+
+        var givenAnswers = appState.answers.toArray();
+
+        var solutionsAndAnswers = ctUtils.zip(solutions, givenAnswers);
+
+        var answerStatuses = solutionsAndAnswers.map(function(arr){
+          return arr[0] === arr[1] ?
+            ctConstants.ANSWER_CORRECT : ctConstants.ANSWER_INCORRECT;
+        });
+
+        var allCorrect = answerStatuses.every(function(status){
+          return status === ctConstants.ANSWER_CORRECT;
+        });
+
         return appState.mergeDeep({
-          stateName: isCorrect ? 'taskCorrect' : 'taskIncorrect',
-          correct: isCorrect ? appState.correct + 1 : appState.correct,
-          attempted: appState.attempted + 1
+          stateName: allCorrect ? 'taskCorrect' : 'taskIncorrect',
+          numCorrect: allCorrect ? appState.numCorrect + 1 : appState.numCorrect,
+          numAttempted: appState.numAttempted + 1,
+          answerStatuses: Immutable.List(answerStatuses)
         });
       }
 
       else if(message.type === 'setAnswer'){
-        return appState.mergeDeep({
-          answer: message.value
-        });
+        return appState.set(
+          'answers', appState.get('answers').set(
+            message.pronounIndex,
+            message.value
+          )
+        );
       }
     }
 
     if(['taskCorrect', 'taskIncorrect'].indexOf(appState.stateName) >= 0){
       if(message.type === 'submit'){
-        if(appState.attempted === appState.numToAttempt){
+        if(appState.numAttempted === appState.numToAttempt){
           as = appState.mergeDeep({
             stateName: 'exerciseFinished',
-            answer: ''
+            answers: ctConstants.INITIAL_ANSWERS,
+            answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
           });
           // Doesn't look like you can set to null with mergeDeep.
           as = as.set('task', null);
@@ -151,7 +159,8 @@ define([
           return appState.mergeDeep({
             stateName: 'solveTask',
             task: nextTask(appState),
-            answer: ''
+            answers: ctConstants.INITIAL_ANSWERS,
+            answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
           });
         }
       }
@@ -161,9 +170,10 @@ define([
       if(message.type === 'startAgain'){
         return appState.mergeDeep({
           stateName: 'configureExercise',
-          attempted: 0,
-          correct: 0,
-          answer: ''
+          numAttempted: 0,
+          numCorrect: 0,
+          answers: ctConstants.INITIAL_ANSWERS,
+          answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
         });
       }
     }
@@ -197,6 +207,7 @@ define([
     this.bus.onValue(
       function(message){
         this.appState = ctMain.nextState(this.appState, message, ctMain.nextTask);
+        console.log(this.appState.toJSON());
         this.component.setProps({as: this.appState});
       }.bind(this)
     );

@@ -8,6 +8,6 @@
     "requirejs": "~2.1.11",
     "almond": "~0.2.9",
     "bacon": "0.7.22",
-    "immutable": "2.0.17"
+    "immutable": "3.6.4"
   }
 }

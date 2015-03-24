@@ -28,5 +28,17 @@ define(['Immutable'], function(Immutable){
     ["Subjunctive, future", "subjunctive/future"]
   ]);
 
+  ctConstants.INITIAL_ANSWERS = ctConstants.PRONOUNS.map(function(){
+    return '';
+  }).toList();
+
+  ctConstants.ANSWER_UNGRADED = 'ANSWER_UNGRADED';
+  ctConstants.ANSWER_CORRECT = 'ANSWER_CORRECT';
+  ctConstants.ANSWER_INCORRECT = 'ANSWER_INCORRECT';
+
+  ctConstants.INITIAL_ANSWER_STATUSES = ctConstants.PRONOUNS.map(function(){
+    return ctConstants.ANSWER_UNGRADED;
+  }).toList();
+
   return ctConstants;
 });

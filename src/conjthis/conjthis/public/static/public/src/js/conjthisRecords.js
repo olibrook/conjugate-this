@@ -9,21 +9,11 @@ define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants){
    * @type {*}
    */
   ctRecords.Task = Immutable.Record({
-
-    // Exercise as displayed to the user
-    display: '',
-
-    // The pronoun of the conjugation for this task
-    pronoun: '',
-
     // The tense required for this task
     tense: '',
 
-    // The correct solution the the current task
-    solution: '',
-
-    // Is the solution a regular conjugation for this tense?
-    regularFlag: ''
+    // The verb to conjugate
+    verb: null
   });
 
   /**
@@ -39,16 +29,19 @@ define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants){
     task: null,
 
     // Number correctly answered
-    correct: 0,
+    numCorrect: 0,
 
     // Number attempted
-    attempted: 0,
+    numAttempted: 0,
 
     // Number of tasks in the exercise
     numToAttempt: 20,
 
-    // The task answer as typed by the user
-    answer: '',
+    // The task answers as typed by the user
+    answers: ctConstants.INITIAL_ANSWERS,
+
+    // Correct/incorrect for each of the given answers. Array.<Boolean>
+    answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES,
 
     // Pronouns active on the exercise
     pronouns: ctConstants.PRONOUNS.map(function(){
