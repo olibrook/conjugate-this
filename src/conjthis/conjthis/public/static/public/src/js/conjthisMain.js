@@ -50,18 +50,124 @@ define([
   };
 
 
-  // TODO: Obviously shit.
-  ctMain.arraysEqual = function(arr1, arr2) {
-    var i;
-    if (arr1.length !== arr2.length) {
+  ctMain.configureExercise = {};
 
+  ctMain.configureExercise.setTense = function(appState, message, nextTask){
+    return appState.set('tense', message.value);
+  };
+
+  ctMain.configureExercise.updatePronouns = function(appState, message, nextTask){
+    return appState.setIn(['pronouns', message.key], message.value);
+  };
+
+  ctMain.configureExercise.startExercise = function(appState, message, nextTask){
+    return appState.mergeDeep({
+      stateName: 'solveTask',
+      task: nextTask(appState),
+      answers: ctConstants.INITIAL_ANSWERS,
+      answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
+    });
+  };
+
+  ctMain.solveTask = {};
+
+  ctMain.solveTask.submit = function(appState, message, nextTask){
+    var tenseKey, solutions, givenAnswers, solutionsAndAnswers,
+        answerStatuses, allCorrect;
+
+    tenseKey = ctConstants.TENSES.get(appState.get('tense'));
+
+    solutions = appState.getIn(
+      ['task', 'verb', 'conjugations', tenseKey]
+    ).map(function(val) {
+        return val.get(1);
+    }).toArray();
+
+    givenAnswers = appState.answers.toArray();
+
+    solutionsAndAnswers = ctUtils.zip(solutions, givenAnswers);
+
+    answerStatuses = solutionsAndAnswers.map(function(arr) {
+      return arr[0] === arr[1] ?
+        ctConstants.ANSWER_CORRECT : ctConstants.ANSWER_INCORRECT;
+    });
+
+    allCorrect = answerStatuses.every(function(status) {
+      return status === ctConstants.ANSWER_CORRECT;
+    });
+
+    return appState.mergeDeep({
+      stateName: allCorrect ? 'taskCorrect' : 'taskIncorrect',
+      numCorrect: allCorrect ? appState.numCorrect + 1 : appState.numCorrect,
+      numAttempted: appState.numAttempted + 1,
+      answerStatuses: Immutable.List(answerStatuses)
+    });
+  };
+
+  ctMain.solveTask.setAnswer = function(appState, message, nextTask){
+    // TODO: I think a mergeDeep does this more nicely!
+    return appState.set(
+      'answers',
+      appState.get('answers').set(message.pronounIndex, message.value)
+    );
+  };
+
+  ctMain.taskIncorrect = {};
+
+  ctMain.taskIncorrect.setTaskIncorrectDisplayMode = function(appState, message, nextTask){
+    return appState.set('taskIncorrectDisplayMode', message.value);
+  };
+
+  ctMain.taskIncorrect.submit = function (appState, message, nextTask){
+    if (appState.numAttempted === appState.numToAttempt) {
+      return appState.mergeDeep({
+        stateName: 'exerciseFinished',
+        answers: ctConstants.INITIAL_ANSWERS,
+        answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
+      }).set('task', null);  // Doesn't work with mergeDeep
+
+    } else {
+      return appState.mergeDeep({
+        stateName: 'solveTask',
+        task: nextTask(appState),
+        answers: ctConstants.INITIAL_ANSWERS,
+        answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES,
+        taskIncorrectDisplayMode: ctConstants.DISPLAY_CORRECT_ANSWERS
+      });
     }
-    for (i = 0; i < arr1.length; i += 1) {
-      if (arr1[i] !== arr2[i]) {
-        return false;
-      }
-    }
-    return true;
+  };
+
+  ctMain.taskCorrect = {};
+
+  ctMain.taskCorrect.submit = ctMain.taskIncorrect.submit;
+
+
+  ctMain.exerciseFinished = {};
+
+  ctMain.exerciseFinished.startAgain = function(appState, message, nextTask){
+    return appState.mergeDeep({
+      stateName: 'configureExercise',
+      numAttempted: 0,
+      numCorrect: 0,
+      answers: ctConstants.INITIAL_ANSWERS,
+      answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
+    });
+  };
+
+  ctMain.noop = function (appState, message, nextTask){
+    return appState // Unmodified
+  };
+
+  ctMain.dispatchMap = {
+    'configureExercise/setTense': ctMain.configureExercise.setTense,
+    'configureExercise/updatePronouns': ctMain.configureExercise.updatePronouns,
+    'configureExercise/startExercise': ctMain.configureExercise.startExercise,
+    'solveTask/submit': ctMain.solveTask.submit,
+    'solveTask/setAnswer': ctMain.solveTask.setAnswer,
+    'taskIncorrect/setTaskIncorrectDisplayMode': ctMain.taskIncorrect.setTaskIncorrectDisplayMode,
+    'taskIncorrect/submit': ctMain.taskIncorrect.submit,
+    'taskCorrect/submit': ctMain.taskCorrect.submit,
+    'exerciseFinished/startAgain': ctMain.exerciseFinished.startAgain
   };
 
 
@@ -77,122 +183,15 @@ define([
    * @return {*}
    */
   ctMain.nextState = function(appState, message, nextTask) {
-    var obj, as;
+    var dispatchKey, func;
 
-    if (!appState) {
-      console.log((new ctRecords.AppState).toJSON());
-      return new ctRecords.AppState();
+    dispatchKey = appState.get('stateName') + '/' + message.type;
+    func = ctMain.dispatchMap[dispatchKey];
+    if(func === undefined){
+      console.log('No handler found for dispatchKey "'+ dispatchKey +'"');
+      func = ctMain.noop;
     }
-
-    if (appState.stateName === 'configureExercise') {
-      if (message.type === 'setTense') {
-        return appState.mergeDeep({tense: message.value});
-      }
-      if (message.type === 'updatePronouns') {
-        obj = {pronouns: {}};
-        obj.pronouns[message.key] = message.value;
-        return appState.mergeDeep(obj);
-      }
-      if (message.type === 'startExercise') {
-        return appState.mergeDeep({
-          stateName: 'solveTask',
-          task: nextTask(appState),
-          answers: ctConstants.INITIAL_ANSWERS,
-          answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
-        });
-      }
-    }
-
-    if (appState.stateName === 'solveTask') {
-      if (message.type === 'submit') {
-
-        var tenseKey = ctConstants.TENSES.get(appState.get('tense'));
-
-        var solutions = appState.getIn(
-          ['task', 'verb', 'conjugations', tenseKey]
-        ).map(function(val) {
-            return val.get(1);
-        }).toArray();
-
-        var givenAnswers = appState.answers.toArray();
-
-        var solutionsAndAnswers = ctUtils.zip(solutions, givenAnswers);
-
-        var answerStatuses = solutionsAndAnswers.map(function(arr) {
-          return arr[0] === arr[1] ?
-            ctConstants.ANSWER_CORRECT : ctConstants.ANSWER_INCORRECT;
-        });
-
-        var allCorrect = answerStatuses.every(function(status) {
-          return status === ctConstants.ANSWER_CORRECT;
-        });
-
-        return appState.mergeDeep({
-          stateName: allCorrect ? 'taskCorrect' : 'taskIncorrect',
-          numCorrect: allCorrect ? appState.numCorrect + 1 : appState.numCorrect,
-          numAttempted: appState.numAttempted + 1,
-          answerStatuses: Immutable.List(answerStatuses)
-        });
-      }
-
-      else if (message.type === 'setAnswer') {
-        return appState.set(
-          'answers', appState.get('answers').set(
-            message.pronounIndex,
-            message.value
-          )
-        );
-      }
-    }
-
-    if (appState.stateName === 'taskIncorrect') {
-      if (message.type === 'setTaskIncorrectDisplayMode') {
-        return appState.mergeDeep({
-          taskIncorrectDisplayMode: message.value
-        });
-      }
-    }
-
-    if (['taskCorrect', 'taskIncorrect'].indexOf(appState.stateName) >= 0) {
-      if (message.type === 'submit') {
-        if (appState.numAttempted === appState.numToAttempt) {
-          as = appState.mergeDeep({
-            stateName: 'exerciseFinished',
-            answers: ctConstants.INITIAL_ANSWERS,
-            answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
-          });
-          // Doesn't look like you can set to null with mergeDeep.
-          as = as.set('task', null);
-          return as;
-        } else {
-          return appState.mergeDeep({
-            stateName: 'solveTask',
-            task: nextTask(appState),
-            answers: ctConstants.INITIAL_ANSWERS,
-            answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES,
-            taskIncorrectDisplayMode: ctConstants.DISPLAY_CORRECT_ANSWERS
-          });
-        }
-      }
-    }
-
-    if (appState.stateName === 'exerciseFinished') {
-      if (message.type === 'startAgain') {
-        return appState.mergeDeep({
-          stateName: 'configureExercise',
-          numAttempted: 0,
-          numCorrect: 0,
-          answers: ctConstants.INITIAL_ANSWERS,
-          answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
-        });
-      }
-    }
-
-    console.log(
-        'Unhandled message: stateName: "' + appState.stateName
-            + '" type: "' + message.type + '". Ignoring.');
-
-    return appState; // Unmodified
+    return func(appState, message, nextTask);
   };
 
   /**
@@ -203,16 +202,14 @@ define([
    */
   ctMain.ConjugateThis = function() {
     this.el = document.createElement('div');
-    this.appState = ctMain.nextState(null, null, ctMain.nextTask);
-
+    this.appState = new ctRecords.AppState();
     this.component = React.renderComponent(
-        ctViews.ConjugatorMain({as: this.appState}), this.el);
+      ctViews.ConjugatorMain({as: this.appState}), this.el
+    );
     this.bus = new Bacon.Bus();
-
     this.commandStream = Bacon.fromEventTarget(this.el, 'command', function(event) {
       return event.detail;
     });
-
     this.bus.plug(this.commandStream);
     this.bus.onValue(
       function(message) {
