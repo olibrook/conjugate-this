@@ -1,4 +1,4 @@
-define(['Immutable'], function(Immutable){
+define(['Immutable'], function(Immutable) {
 
   'use strict';
 
@@ -16,19 +16,19 @@ define(['Immutable'], function(Immutable){
 
   // Maps tense -> key used in the verbs data
   ctConstants.TENSES = Immutable.OrderedMap([
-    ["Indicative, present", "indicative/present"],
-    ["Indicative, preterite", "indicative/preterite"],
-    ["Indicative, future", "indicative/future"],
-    ["Indicative, conditional", "indicative/conditional"],
-    ["Indicative, imperfect", "indicative/imperfect"],
-    ["Imperative", "imperative/imperative"],
-    ["Subjunctive, present", "subjunctive/present"],
-    ["Subjunctive, imperfect", "subjunctive/imperfect"],
-    ["Subjunctive, imperfect 2", "subjunctive/imperfect-2"],
-    ["Subjunctive, future", "subjunctive/future"]
+    ['Indicative, present', 'indicative/present'],
+    ['Indicative, preterite', 'indicative/preterite'],
+    ['Indicative, future', 'indicative/future'],
+    ['Indicative, conditional', 'indicative/conditional'],
+    ['Indicative, imperfect', 'indicative/imperfect'],
+    ['Imperative', 'imperative/imperative'],
+    ['Subjunctive, present', 'subjunctive/present'],
+    ['Subjunctive, imperfect', 'subjunctive/imperfect'],
+    ['Subjunctive, imperfect 2', 'subjunctive/imperfect-2'],
+    ['Subjunctive, future', 'subjunctive/future']
   ]);
 
-  ctConstants.INITIAL_ANSWERS = ctConstants.PRONOUNS.map(function(){
+  ctConstants.INITIAL_ANSWERS = ctConstants.PRONOUNS.map(function() {
     return '';
   }).toList();
 
@@ -36,7 +36,7 @@ define(['Immutable'], function(Immutable){
   ctConstants.ANSWER_CORRECT = 'ANSWER_CORRECT';
   ctConstants.ANSWER_INCORRECT = 'ANSWER_INCORRECT';
 
-  ctConstants.INITIAL_ANSWER_STATUSES = ctConstants.PRONOUNS.map(function(){
+  ctConstants.INITIAL_ANSWER_STATUSES = ctConstants.PRONOUNS.map(function() {
     return ctConstants.ANSWER_UNGRADED;
   }).toList();
 

@@ -1,4 +1,4 @@
-define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConstants, ctUtils){
+define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConstants, ctUtils) {
 
   'use strict';
 
@@ -8,7 +8,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
   ctViews.ConjugatorTextInput = React.createClass({
     displayName: 'ConjugatorTextInput',
 
-    render: function(){
+    render: function() {
 
       var answerStatus, pronoun, pronounIndex, isIrregular, groupClass,
           feedback, correctAnswer, conjugated, task, tenseKey,
@@ -22,7 +22,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       displayMode = this.props.as.get('taskIncorrectDisplayMode');
 
 
-      if(task === null){
+      if (task === null) {
         isIrregular = false;
 
       } else {
@@ -32,7 +32,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
         correctAnswer = conjugated.get(1);
       }
 
-      switch(answerStatus){
+      switch (answerStatus) {
         case ctConstants.ANSWER_CORRECT:
           groupClass = ['form-group', 'has-success', 'has-feedback'];
           feedback = d.span({className: 'glyphicon glyphicon-ok form-control-feedback'});
@@ -84,15 +84,15 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       );
     },
 
-    focus: function(){
+    focus: function() {
       this.refs['input'].getDOMNode().focus();
     },
 
-    onChange: function(e){
+    onChange: function(e) {
       this.setAnswer(e.target.value);
     },
 
-    setAnswer: function(answer){
+    setAnswer: function(answer) {
       this.getDOMNode().dispatchEvent(
         new CustomEvent('command', {
           detail: {
@@ -113,7 +113,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     displayName: 'ExerciseForm',
 
-    render: function(){
+    render: function() {
       var verb,
           stateName,
           display,
@@ -129,7 +129,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
         ctConstants.PRONOUNS.keySeq().toArray()
       );
 
-      if(task === null){
+      if (task === null) {
         display = '';
         tense = '';
 
@@ -151,7 +151,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
           d.h2({style: {margin: '0.75em 0'}}, display),
           d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
             statusPronounPairs.map(
-              function(statusPronounPair, index){
+              function(statusPronounPair, index) {
                 return ctViews.ConjugatorTextInput({
                   as: this.props.as,
                   answerStatus: statusPronounPair[0],
@@ -175,7 +175,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
             )
           )
         )
-      )
+      );
     },
 
     componentDidUpdate: function(prevProps) {
@@ -188,7 +188,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       }
     },
 
-    onSubmit: function(e){
+    onSubmit: function(e) {
       console.log('OnSubmit');
       e.preventDefault();
       this.getDOMNode().dispatchEvent(
@@ -208,10 +208,10 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     displayName: 'CorrectionsToggleButton',
 
-    render: function(){
+    render: function() {
 
       if (this.props.as.get('stateName') === 'taskIncorrect') {
-        if(this.props.as.get('taskIncorrectDisplayMode') === ctConstants.DISPLAY_CORRECT_ANSWERS) {
+        if (this.props.as.get('taskIncorrectDisplayMode') === ctConstants.DISPLAY_CORRECT_ANSWERS) {
           return d.button(
             {
               onClick: this.onClick.bind(null, ctConstants.DISPLAY_USER_ANSWERS),
@@ -221,7 +221,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
           );
         }
 
-        if(this.props.as.get('taskIncorrectDisplayMode') === ctConstants.DISPLAY_USER_ANSWERS) {
+        if (this.props.as.get('taskIncorrectDisplayMode') === ctConstants.DISPLAY_USER_ANSWERS) {
           return d.button(
             {
               onClick: this.onClick.bind(null, ctConstants.DISPLAY_CORRECT_ANSWERS),
@@ -235,7 +235,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       return d.span({}, '');
     },
 
-    onClick: function(displayMode, e){
+    onClick: function(displayMode, e) {
       e.preventDefault();
 
       this.getDOMNode().dispatchEvent(
@@ -256,8 +256,8 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     displayName: 'SettingsForm',
 
-    renderTenseCheckboxes: function(){
-      return ctConstants.TENSES.map(function(tenseId, tense){
+    renderTenseCheckboxes: function() {
+      return ctConstants.TENSES.map(function(tenseId, tense) {
         return d.div({className: 'radio', key: tense},
           d.label({},
             d.input({
@@ -265,35 +265,35 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
               name: 'tenseOptions',
               ref: tense,
               checked: this.props.as.getIn(['tense']) === tense,
-              onChange: function(e){this.onTenseChange(e, tense)}.bind(this)
+              onChange: function(e) {this.onTenseChange(e, tense)}.bind(this)
             }),
             d.span({style: {verticalAlign: 'top'}}, tense)
           )
-        )
+        );
       }, this).valueSeq().toArray();
     },
 
-    renderPronounCheckboxes: function(){
-      return ctConstants.PRONOUNS.map(function(pronounIdx, pronoun){
+    renderPronounCheckboxes: function() {
+      return ctConstants.PRONOUNS.map(function(pronounIdx, pronoun) {
         return d.div({className: 'checkbox', key: pronoun},
           d.label({},
             d.input({
               type: 'checkbox',
               ref: pronoun,
               checked: this.props.as.getIn(['pronouns', pronoun]),
-              onChange: function(e){this.onPronounChange(e, pronoun)}.bind(this)
+              onChange: function(e) {this.onPronounChange(e, pronoun)}.bind(this)
             }),
             d.span({style: {verticalAlign: 'top'}}, pronoun)
           )
-        )
+        );
       }, this).valueSeq().toArray();
     },
 
-    renderVerbCheckboxes: function(){
+    renderVerbCheckboxes: function() {
 
     },
 
-    render: function(){
+    render: function() {
       return d.div({className: 'panel panel-default'},
         d.div({className: 'panel-heading'}, 'Settings Form'),
         d.div({className: 'panel-body'},
@@ -334,7 +334,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       );
     },
 
-    onTenseChange: function(e, tense){
+    onTenseChange: function(e, tense) {
       this.getDOMNode().dispatchEvent(
         new CustomEvent('command', {
           detail: {
@@ -347,7 +347,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       );
     },
 
-    onPronounChange: function(e, pronoun){
+    onPronounChange: function(e, pronoun) {
       this.getDOMNode().dispatchEvent(
         new CustomEvent('command', {
           detail: {
@@ -363,9 +363,8 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     /**
      * On submit, start the exercise.
-     * @param e
      */
-    onSubmit: function(e){
+    onSubmit: function(e) {
       e.preventDefault();
 
       this.getDOMNode().dispatchEvent(
@@ -384,10 +383,10 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     displayName: 'ResultsView',
 
-    render: function(){
+    render: function() {
       var content;
 
-      if(this.props.as.get('stateName') === 'exerciseFinished'){
+      if (this.props.as.get('stateName') === 'exerciseFinished') {
         content = d.div({},
           d.h3({}, 'Exercise complete. Score: ' +
               this.props.as.get('numCorrect') + '/' +
@@ -403,7 +402,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       );
     },
 
-    onStartAgainClick: function(e){
+    onStartAgainClick: function(e) {
       this.getDOMNode().dispatchEvent(
         new CustomEvent('command', {
           detail: {
@@ -421,7 +420,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     displayName: 'ConjugatorMain',
 
-    render: function(){
+    render: function() {
       return d.div({},
         d.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
           d.div({className: 'container'},
@@ -435,14 +434,14 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
             d.div({className: 'slide'}, d.div({className: 'container'}, ctViews.ResultsView({as: this.props.as})))
           )
         )
-      )
+      );
     },
 
-    componentDidMount: function(){
+    componentDidMount: function() {
       this.fixScroll();
     },
 
-    componentDidUpdate: function(){
+    componentDidUpdate: function() {
       this.fixScroll();
     },
 
@@ -451,9 +450,9 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
      * Seems to set scrollLeft when there is overflowing content
      * even when "overflow-x: hidden" used in the CSS.
      */
-    fixScroll: function(){
+    fixScroll: function() {
       var domNode = this.refs.slider.getDOMNode();
-      setTimeout(function(){
+      setTimeout(function() {
         domNode.scrollLeft = 0;
       }, 40);
     }

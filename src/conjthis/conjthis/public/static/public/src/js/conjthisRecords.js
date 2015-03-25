@@ -1,4 +1,4 @@
-define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants){
+define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants) {
 
   'use strict';
 
@@ -44,7 +44,7 @@ define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants){
     answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES,
 
     // Pronouns active on the exercise
-    pronouns: ctConstants.PRONOUNS.map(function(){
+    pronouns: ctConstants.PRONOUNS.map(function() {
       return true;
     }).toMap(),
 

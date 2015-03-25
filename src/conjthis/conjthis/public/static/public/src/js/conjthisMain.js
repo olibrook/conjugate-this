@@ -28,22 +28,22 @@ define([
   /**
    * Choose the next verb to practice.
    */
-  ctMain.chooseVerb = function(arr){
+  ctMain.chooseVerb = function(arr) {
     return arr[Math.round(Math.random() * (arr.length - 1))];
   };
 
-  ctMain.createTask = function(verb, appState){
+  ctMain.createTask = function(verb, appState) {
     return new ctRecords.Task({
       tense: appState.get('tense'),
       verb: Immutable.fromJS(verb)
     });
   };
 
-  ctMain.nextTask = function(appState){
+  ctMain.nextTask = function(appState) {
     return ctMain.createTask(ctMain.chooseVerb(ctVerbs), appState);
   };
 
-  ctMain.randomEntry = function(map){
+  ctMain.randomEntry = function(map) {
     var keys = map.keySeq().toArray(),
         randomKey = keys[Math.round(Math.random() * (keys.length - 1))];
     return [randomKey, map.get(randomKey)];
@@ -53,11 +53,11 @@ define([
   // TODO: Obviously shit.
   ctMain.arraysEqual = function(arr1, arr2) {
     var i;
-    if(arr1.length !== arr2.length){
+    if (arr1.length !== arr2.length) {
 
     }
-    for(i = 0; i < arr1.length; i += 1) {
-      if(arr1[i] !== arr2[i]){
+    for (i = 0; i < arr1.length; i += 1) {
+      if (arr1[i] !== arr2[i]) {
         return false;
       }
     }
@@ -74,26 +74,26 @@ define([
    * @param appState
    * @param message
    * @param nextTask
-   * @returns {*}
+   * @return {*}
    */
-  ctMain.nextState = function(appState, message, nextTask){
+  ctMain.nextState = function(appState, message, nextTask) {
     var obj, as;
 
-    if(!appState){
+    if (!appState) {
       console.log((new ctRecords.AppState).toJSON());
       return new ctRecords.AppState();
     }
 
-    if(appState.stateName === 'configureExercise'){
-      if(message.type === 'setTense'){
+    if (appState.stateName === 'configureExercise') {
+      if (message.type === 'setTense') {
         return appState.mergeDeep({tense: message.value});
       }
-      if(message.type === 'updatePronouns'){
+      if (message.type === 'updatePronouns') {
         obj = {pronouns: {}};
         obj.pronouns[message.key] = message.value;
         return appState.mergeDeep(obj);
       }
-      if(message.type === 'startExercise'){
+      if (message.type === 'startExercise') {
         return appState.mergeDeep({
           stateName: 'solveTask',
           task: nextTask(appState),
@@ -103,27 +103,27 @@ define([
       }
     }
 
-    if(appState.stateName === 'solveTask'){
-      if(message.type === 'submit'){
+    if (appState.stateName === 'solveTask') {
+      if (message.type === 'submit') {
 
         var tenseKey = ctConstants.TENSES.get(appState.get('tense'));
 
         var solutions = appState.getIn(
           ['task', 'verb', 'conjugations', tenseKey]
-        ).map(function(val){
-            return val.get(1)
+        ).map(function(val) {
+            return val.get(1);
         }).toArray();
 
         var givenAnswers = appState.answers.toArray();
 
         var solutionsAndAnswers = ctUtils.zip(solutions, givenAnswers);
 
-        var answerStatuses = solutionsAndAnswers.map(function(arr){
+        var answerStatuses = solutionsAndAnswers.map(function(arr) {
           return arr[0] === arr[1] ?
             ctConstants.ANSWER_CORRECT : ctConstants.ANSWER_INCORRECT;
         });
 
-        var allCorrect = answerStatuses.every(function(status){
+        var allCorrect = answerStatuses.every(function(status) {
           return status === ctConstants.ANSWER_CORRECT;
         });
 
@@ -135,7 +135,7 @@ define([
         });
       }
 
-      else if(message.type === 'setAnswer'){
+      else if (message.type === 'setAnswer') {
         return appState.set(
           'answers', appState.get('answers').set(
             message.pronounIndex,
@@ -145,17 +145,17 @@ define([
       }
     }
 
-    if(appState.stateName === 'taskIncorrect') {
-      if(message.type === 'setTaskIncorrectDisplayMode') {
+    if (appState.stateName === 'taskIncorrect') {
+      if (message.type === 'setTaskIncorrectDisplayMode') {
         return appState.mergeDeep({
           taskIncorrectDisplayMode: message.value
         });
       }
     }
 
-    if(['taskCorrect', 'taskIncorrect'].indexOf(appState.stateName) >= 0){
-      if(message.type === 'submit'){
-        if(appState.numAttempted === appState.numToAttempt){
+    if (['taskCorrect', 'taskIncorrect'].indexOf(appState.stateName) >= 0) {
+      if (message.type === 'submit') {
+        if (appState.numAttempted === appState.numToAttempt) {
           as = appState.mergeDeep({
             stateName: 'exerciseFinished',
             answers: ctConstants.INITIAL_ANSWERS,
@@ -176,8 +176,8 @@ define([
       }
     }
 
-    if(appState.stateName === 'exerciseFinished'){
-      if(message.type === 'startAgain'){
+    if (appState.stateName === 'exerciseFinished') {
+      if (message.type === 'startAgain') {
         return appState.mergeDeep({
           stateName: 'configureExercise',
           numAttempted: 0,
@@ -201,7 +201,7 @@ define([
    *
    * @constructor
    */
-  ctMain.ConjugateThis = function(){
+  ctMain.ConjugateThis = function() {
     this.el = document.createElement('div');
     this.appState = ctMain.nextState(null, null, ctMain.nextTask);
 
@@ -209,13 +209,13 @@ define([
         ctViews.ConjugatorMain({as: this.appState}), this.el);
     this.bus = new Bacon.Bus();
 
-    this.commandStream = Bacon.fromEventTarget(this.el, "command", function(event){
-      return event.detail
+    this.commandStream = Bacon.fromEventTarget(this.el, 'command', function(event) {
+      return event.detail;
     });
 
     this.bus.plug(this.commandStream);
     this.bus.onValue(
-      function(message){
+      function(message) {
         this.appState = ctMain.nextState(this.appState, message, ctMain.nextTask);
         console.log(this.appState.toJSON());
         this.component.setProps({as: this.appState});
@@ -223,7 +223,7 @@ define([
     );
   };
 
-  ctMain.init = function(){
+  ctMain.init = function() {
     var app = new ctMain.ConjugateThis();
     document.body.appendChild(app.el);
   };
