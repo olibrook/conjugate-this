@@ -75,12 +75,17 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
               className: 'form-control input-lg',
               type: 'text',
               onChange: this.onChange,
-              value: value
+              value: value,
+              ref: 'input'
             }),
             feedback
           )
         )
       );
+    },
+
+    focus: function(){
+      this.refs['input'].getDOMNode().focus();
     },
 
     onChange: function(e){
@@ -146,13 +151,14 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
           d.h2({style: {margin: '0.75em 0'}}, display),
           d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
             statusPronounPairs.map(
-              function(statusPronounPair){
+              function(statusPronounPair, index){
                 return ctViews.ConjugatorTextInput({
                   as: this.props.as,
                   answerStatus: statusPronounPair[0],
                   pronoun: statusPronounPair[1],
                   pronounIndex: ctConstants.PRONOUNS.get(statusPronounPair[1]),
-                  tenseKey: task !== null ? ctConstants.TENSES.get(task.get('tense')) : null
+                  tenseKey: task !== null ? ctConstants.TENSES.get(task.get('tense')) : null,
+                  ref: 'input-' + index
                 });
               },
               this
@@ -165,6 +171,16 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
           )
         )
       )
+    },
+
+    componentDidUpdate: function(prevProps) {
+      var path;
+
+      // Focus first field when verb changes
+      path = ['task', 'verb', 'spanish'];
+      if (prevProps.as.getIn(path) !== this.props.as.getIn(path)) {
+        this.refs['input-0'].focus();
+      }
     },
 
     onSubmit: function(e){

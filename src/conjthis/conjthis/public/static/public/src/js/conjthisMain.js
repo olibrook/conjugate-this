@@ -7,6 +7,7 @@
 //   - When picking the next verb for a task, always pick from the front of
 //     the queue.
 // TODO: Remove the task record. Totally unnecessary.
+// TODO: Ability to input spanish characters.
 
 define([
     'React',
