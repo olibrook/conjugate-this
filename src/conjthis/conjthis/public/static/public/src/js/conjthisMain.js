@@ -8,6 +8,7 @@
 //     the queue.
 // TODO: Remove the task record. Totally unnecessary.
 // TODO: Ability to input spanish characters.
+// TODO: Stupid idea - make a turn-based, pokemon-style battle game out of this!
 
 define([
     'React',

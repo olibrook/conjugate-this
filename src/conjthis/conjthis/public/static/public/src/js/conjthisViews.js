@@ -163,10 +163,15 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
               },
               this
             ),
-            d.div({className: 'form-group'},
-              d.button({type: 'submit', className: 'btn btn-primary'}, 'Submit'),
-              ' ',
-              ctViews.CorrectionsToggleButton({as: this.props.as})
+            d.div({className: 'form-group clearfix'},
+              d.div({className: 'pull-left'},
+                d.button({type: 'submit', className: 'btn btn-primary'},
+                  stateName === 'solveTask' ? 'Check' : 'Continue'
+                )
+              ),
+              d.div({className: 'pull-right'},
+                ctViews.CorrectionsToggleButton({as: this.props.as})
+              )
             )
           )
         )
