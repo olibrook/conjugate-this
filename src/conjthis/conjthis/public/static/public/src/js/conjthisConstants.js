@@ -40,5 +40,8 @@ define(['Immutable'], function(Immutable){
     return ctConstants.ANSWER_UNGRADED;
   }).toList();
 
+  ctConstants.DISPLAY_CORRECT_ANSWERS = 'DISPLAY_CORRECT_ANSWERS';
+  ctConstants.DISPLAY_USER_ANSWERS = 'DISPLAY_USER_ANSWERS';
+
   return ctConstants;
 });

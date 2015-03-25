@@ -7,111 +7,80 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
   ctViews.ConjugatorTextInput = React.createClass({
     displayName: 'ConjugatorTextInput',
-    SHIFT: 16,
-    ALT: 18,
-
-    LEFT: 37,
-    UP: 38,
-    RIGHT: 39,
-    DOWN: 40,
-
-    ACCENT_CYCLES: {
-      'a': ['a', 'á'],
-      'e': ['e', 'é'],
-      'i': ['i', 'í'],
-      'o': ['o', 'ó'],
-      'u': ['u', 'ú', 'ü'],
-      'n': ['n', 'ñ']
-    },
-
-    reverseMap: null,
-
-    getInitialState: function(){
-      return {
-        modifierIndex: 0,
-        value: '',
-        restoreCursor: null
-      }
-    },
 
     render: function(){
-      return d.input({
-        className: 'form-control input-lg',
-        type: 'text',
-        onKeyDown: this.onKeyDown,
-        onChange: this.onChange,
-        value: this.props.as.getIn(['answers', this.props.pronounIndex])
-      });
-    },
 
-    onKeyDown: function(e){
-      var answer, chr, unaccented, accented, index, isUpper, domNode, selectionStart;
-      domNode = this.getDOMNode();
-      selectionStart = domNode.selectionStart;
-      answer = this.props.as.getIn(['answers', this.props.pronounIndex])
+      var answerStatus, pronoun, pronounIndex, isIrregular, groupClass,
+          feedback, correctAnswer, conjugated, task, tenseKey,
+          value, displayMode;
 
-      if( (e.keyCode == this.UP) || (e.keyCode == this.DOWN) ){
-        index = e.keyCode == this.UP ? this.state.modifierIndex + 1 : this.state.modifierIndex - 1;
-        chr = answer.length > 0 ? answer.charAt(selectionStart - 1) : '';
-        isUpper = chr.toUpperCase() == chr;
-        unaccented = this.getUnaccented(chr.toLowerCase());
-        accented = this.getAccented(unaccented, index);
-        accented = isUpper ? accented.toUpperCase() : accented;
-        answer = answer.slice(0, selectionStart -1) + accented + answer.slice(selectionStart, answer.length);
-        this.setAnswer(answer);
-        this.setState({modifierIndex: index, restoreCursor: selectionStart});
+      answerStatus = this.props.answerStatus;
+      pronoun = this.props.pronoun;
+      task = this.props.as.get('task');
+      tenseKey = this.props.tenseKey;
+      pronounIndex = ctConstants.PRONOUNS.get(pronoun);
+      displayMode = this.props.as.get('taskIncorrectDisplayMode');
+
+
+      if(task === null){
+        isIrregular = false;
+
       } else {
-        this.setState({modifierIndex: 0, restoreCursor: null});
+        tenseKey = ctConstants.TENSES.get(task.get('tense'));
+        conjugated = task.getIn(['verb', 'conjugations', tenseKey, pronounIndex]);
+        isIrregular = conjugated.get(0) === 'i';
+        correctAnswer = conjugated.get(1);
       }
-    },
 
-    componentDidUpdate: function(){
-      var domNode = this.getDOMNode();
-      if(this.state.restoreCursor !== null){
-        domNode.selectionStart = this.state.restoreCursor;
-        domNode.selectionEnd = this.state.restoreCursor;
+      switch(answerStatus){
+        case ctConstants.ANSWER_CORRECT:
+          groupClass = ['form-group', 'has-success', 'has-feedback'];
+          feedback = d.span({className: 'glyphicon glyphicon-ok form-control-feedback'});
+          value = this.props.as.getIn(['answers', pronounIndex]);
+          break;
+
+        case ctConstants.ANSWER_INCORRECT:
+          groupClass = ['form-group', 'has-error', 'has-feedback'];
+          feedback = d.span({className: 'glyphicon glyphicon-remove form-control-feedback'});
+
+          value = (
+            displayMode === ctConstants.DISPLAY_CORRECT_ANSWERS ? correctAnswer :
+            displayMode === ctConstants.DISPLAY_USER_ANSWERS ? this.props.as.getIn(['answers', pronounIndex]) :
+            '');
+
+          break;
+
+        case ctConstants.ANSWER_UNGRADED:
+          groupClass = isIrregular ?
+            ['form-group', 'has-warning', 'has-feedback'] :
+            ['form-group'];
+          feedback = isIrregular ?
+            d.span({className: 'glyphicon glyphicon-warning-sign form-control-feedback'}) :
+            '';
+          value = this.props.as.getIn(['answers', pronounIndex]);
+          break;
+
+        default:
+          throw new Error('Unhandled answerStatus');
+          break;
       }
-    },
 
-    getReverseMap: function(){
-      var k, i, reverseMap;
-      if(this.reverseMap === null){
-        reverseMap = {};
-        for(k in this.ACCENT_CYCLES){
-          if(this.ACCENT_CYCLES.hasOwnProperty(k)){
-            for(i=0; i< this.ACCENT_CYCLES[k].length; i+=1){
-              reverseMap[this.ACCENT_CYCLES[k][i]] = k;
-            }
-          }
-        }
-        this.reverseMap = reverseMap;
-      }
-      return this.reverseMap;
-    },
-
-    getUnaccented: function(chr){
-      var reverseMap = this.getReverseMap();
-      if(reverseMap[chr] !== undefined){
-        return reverseMap[chr]
-      } else {
-        return chr;
-      }
-    },
-
-    getAccented: function(chr, index){
-      var isUpper = chr.toUpperCase() === chr,
-          lower = chr.toLowerCase(),
-          ret;
-
-      if(this.ACCENT_CYCLES[lower] !== undefined){
-        ret = this.ACCENT_CYCLES[lower][Math.abs(index % this.ACCENT_CYCLES[lower].length)];
-        if(isUpper){
-          ret = ret.toUpperCase();
-        }
-        return ret;
-      } else {
-        return chr;
-      }
+      return (
+        d.div({key: 'text-input-' + pronoun, className: groupClass.join(' ')},
+          d.div({className: 'input-group'},
+            d.span({className: 'input-group-addon'},
+              d.span({style: {display: 'inline-block', width: '90px'}}, pronoun)
+            ),
+            d.input({
+              className: 'form-control input-lg',
+              type: 'text',
+              onChange: this.onChange,
+              value: value
+            }),
+            feedback
+          )
+        )
+      );
     },
 
     onChange: function(e){
@@ -133,97 +102,27 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
     }
   });
 
+
+
   ctViews.ExerciseForm = React.createClass({
 
     displayName: 'ExerciseForm',
-
-    getInitialState: function(){
-      return {
-        shiftKey: false
-      }
-    },
-
-    renderTextInputs: function(){
-      var task, tenseKey, zipped;
-
-      task = this.props.as.get('task');
-
-      zipped = ctUtils.zip(
-        this.props.as.get('answerStatuses').toArray(),
-        ctConstants.PRONOUNS.keySeq().toArray()
-      );
-
-      return zipped.map(function(arr){
-        var answerStatus, pronoun, pronounIndex, isIrregular, groupClass, feedback;
-
-        answerStatus = arr[0];
-        pronoun = arr[1];
-        pronounIndex = ctConstants.PRONOUNS.get(pronoun);
-
-
-        if(task === null){
-          isIrregular = false;
-
-        } else {
-          tenseKey = ctConstants.TENSES.get(task.get('tense'));
-          isIrregular = task.getIn(['verb', 'conjugations', tenseKey, pronounIndex, 0]) === 'i';
-        }
-
-
-        switch(answerStatus){
-          case ctConstants.ANSWER_CORRECT:
-            groupClass = ['form-group', 'has-success', 'has-feedback'];
-            feedback = d.span({className: 'glyphicon glyphicon-ok form-control-feedback'});
-            break;
-
-          case ctConstants.ANSWER_INCORRECT:
-            groupClass = ['form-group', 'has-error', 'has-feedback'];
-            feedback = d.span({className: 'glyphicon glyphicon-remove form-control-feedback'});
-            break;
-
-          case ctConstants.ANSWER_UNGRADED:
-            groupClass = isIrregular ?
-              ['form-group', 'has-warning', 'has-feedback'] :
-              ['form-group'];
-            feedback = isIrregular ?
-              d.span({className: 'glyphicon glyphicon-warning-sign form-control-feedback'}) :
-              '';
-            break;
-
-          default:
-            groupClass = ['form-group'];
-            feedback = '';
-            break;
-        }
-
-        return (
-          d.div({key: 'text-input-' + pronoun, className: groupClass.join(' ')},
-            d.div({className: 'input-group'},
-              d.span({className: 'input-group-addon'},
-                d.span({style: {display: 'inline-block', width: '90px'}}, pronoun)
-              ),
-              ctViews.ConjugatorTextInput({
-                as: this.props.as,
-                pronounIndex: pronounIndex,
-                pronoun: pronoun
-              }),
-              feedback
-            )
-          )
-        );
-      }, this);
-    },
 
     render: function(){
       var verb,
           stateName,
           display,
           task,
-          tense;
+          tense,
+          statusPronounPairs;
 
       task = this.props.as.get('task');
       stateName = this.props.as.get('stateName');
       verb = this.props.as.getIn(['task', 'verb']);
+      statusPronounPairs = ctUtils.zip(
+        this.props.as.get('answerStatuses').toArray(),
+        ctConstants.PRONOUNS.keySeq().toArray()
+      );
 
       if(task === null){
         display = '';
@@ -240,14 +139,29 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
             tense
           ),
           d.div({className: 'pull-right'},
-            d.span({}, 'Score ', d.span({className: 'badge'}, this.props.as.get('numCorrect') + ' / ' + this.props.as.get('numAttempted')))
+            d.span({className: 'badge'}, this.props.as.get('numCorrect') + ' / ' + this.props.as.get('numAttempted'))
           )
         ),
         d.div({className: 'panel-body'},
           d.h2({style: {margin: '0.75em 0'}}, display),
           d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
-            this.renderTextInputs(),
-            d.input({type: 'submit', value: 'Submit'})
+            statusPronounPairs.map(
+              function(statusPronounPair){
+                return ctViews.ConjugatorTextInput({
+                  as: this.props.as,
+                  answerStatus: statusPronounPair[0],
+                  pronoun: statusPronounPair[1],
+                  pronounIndex: ctConstants.PRONOUNS.get(statusPronounPair[1]),
+                  tenseKey: task !== null ? ctConstants.TENSES.get(task.get('tense')) : null
+                });
+              },
+              this
+            ),
+            d.div({className: 'form-group'},
+              d.button({type: 'submit', className: 'btn btn-primary'}, 'Submit'),
+              ' ',
+              ctViews.CorrectionsToggleButton({as: this.props.as})
+            )
           )
         )
       )
@@ -265,21 +179,57 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
           cancelable: false
         })
       );
-    },
-
-    onKeyDown: function(e){
-      var shiftKey = e.keyCode === this.SHIFT;
-      if(shiftKey){
-        this.setState({shiftKey: true});
-      }
-    },
-
-    onKeyUp: function(e){
-      if(e.keyCode === this.SHIFT){
-        this.setState({shiftKey: false});
-      }
     }
   });
+
+
+  ctViews.CorrectionsToggleButton = React.createClass({
+
+    displayName: 'CorrectionsToggleButton',
+
+    render: function(){
+
+      if (this.props.as.get('stateName') === 'taskIncorrect') {
+        if(this.props.as.get('taskIncorrectDisplayMode') === ctConstants.DISPLAY_CORRECT_ANSWERS) {
+          return d.button(
+            {
+              onClick: this.onClick.bind(null, ctConstants.DISPLAY_USER_ANSWERS),
+              className: 'btn btn-default'
+            },
+            'Show my answers'
+          );
+        }
+
+        if(this.props.as.get('taskIncorrectDisplayMode') === ctConstants.DISPLAY_USER_ANSWERS) {
+          return d.button(
+            {
+              onClick: this.onClick.bind(null, ctConstants.DISPLAY_CORRECT_ANSWERS),
+              className: 'btn btn-default'
+            },
+            'Show correct answers'
+          );
+        }
+      }
+
+      return d.span({}, '');
+    },
+
+    onClick: function(displayMode, e){
+      e.preventDefault();
+
+      this.getDOMNode().dispatchEvent(
+        new CustomEvent('command', {
+          detail: {
+            type: 'setTaskIncorrectDisplayMode',
+            value: displayMode
+          },
+          bubbles: true,
+          cancelable: false
+        })
+      );
+    }
+  });
+
 
   ctViews.SettingsForm = React.createClass({
 
@@ -420,7 +370,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
         content = d.div({},
           d.h3({}, 'Exercise complete. Score: ' +
               this.props.as.get('numCorrect') + '/' +
-              this.props.as.get('attempted')),
+              this.props.as.get('numAttempted')),
           d.button({className: 'btn btn-primary', onClick: this.onStartAgainClick}, 'Start again'));
       } else {
         content = d.div({}, '');

@@ -144,6 +144,14 @@ define([
       }
     }
 
+    if(appState.stateName === 'taskIncorrect') {
+      if(message.type === 'setTaskIncorrectDisplayMode') {
+        return appState.mergeDeep({
+          taskIncorrectDisplayMode: message.value
+        });
+      }
+    }
+
     if(['taskCorrect', 'taskIncorrect'].indexOf(appState.stateName) >= 0){
       if(message.type === 'submit'){
         if(appState.numAttempted === appState.numToAttempt){
@@ -160,7 +168,8 @@ define([
             stateName: 'solveTask',
             task: nextTask(appState),
             answers: ctConstants.INITIAL_ANSWERS,
-            answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
+            answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES,
+            taskIncorrectDisplayMode: ctConstants.DISPLAY_CORRECT_ANSWERS
           });
         }
       }

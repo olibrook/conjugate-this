@@ -49,7 +49,10 @@ define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants){
     }).toMap(),
 
     // Tense active for the exercise
-    tense: ctConstants.TENSES.keySeq().first()
+    tense: ctConstants.TENSES.keySeq().first(),
+
+    // Display corrections or user's answers when task incorrectly solved
+    taskIncorrectDisplayMode: ctConstants.DISPLAY_CORRECT_ANSWERS
   });
 
   return ctRecords;
