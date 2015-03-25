@@ -27,7 +27,6 @@ define([
 
   /**
    * Choose the next verb to practice.
-   * TODO: Currently random. Spaced repetition would be cool.
    */
   ctMain.chooseVerb = function(arr){
     return arr[Math.round(Math.random() * (arr.length - 1))];
