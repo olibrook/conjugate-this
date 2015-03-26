@@ -11,7 +11,8 @@ require.config({
     conjthisVerbs: 'public/src/js/conjthisVerbs',
     conjthisViews: 'public/src/js/conjthisViews',
     conjthisRecords: 'public/src/js/conjthisRecords',
-    conjthisUtils: 'public/src/js/conjthisUtils'
+    conjthisUtils: 'public/src/js/conjthisUtils',
+    conjthisAudio: 'public/src/js/conjthisAudio'
   }
 });
 

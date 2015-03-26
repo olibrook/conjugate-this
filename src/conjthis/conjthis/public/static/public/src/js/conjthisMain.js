@@ -5,8 +5,9 @@ define([
     'conjthisVerbs',
     'conjthisViews',
     'conjthisRecords',
-    'conjthisUtils'
-], function(React, Bacon, Immutable, ctVerbs, ctViews, ctRecords, ctUtils) {
+    'conjthisUtils',
+    'conjthisAudio'
+], function(React, Bacon, Immutable, ctVerbs, ctViews, ctRecords, ctUtils, ctAudio) {
 
   'use strict';
 
@@ -39,18 +40,18 @@ define([
 
   ctMain.configureExercise = {};
 
-  ctMain.configureExercise.setTense = function(appState, message, nextTask){
+  ctMain.configureExercise.setTense = function(appState, message){
     return appState.set('tense', message.value);
   };
 
-  ctMain.configureExercise.updatePronouns = function(appState, message, nextTask){
+  ctMain.configureExercise.updatePronouns = function(appState, message){
     return appState.setIn(['pronouns', message.key], message.value);
   };
 
-  ctMain.configureExercise.startExercise = function(appState, message, nextTask){
+  ctMain.configureExercise.startExercise = function(appState, message){
     return appState.mergeDeep({
       stateName: 'solveTask',
-      task: nextTask(appState),
+      task: ctMain.nextTask(appState),
       answers: ctRecords.INITIAL_ANSWERS,
       answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES
     });
@@ -58,7 +59,7 @@ define([
 
   ctMain.solveTask = {};
 
-  ctMain.solveTask.submit = function(appState, message, nextTask){
+  ctMain.solveTask.submit = function(appState, message){
     var tenseKey, solutions, givenAnswers, solutionsAndAnswers,
         answerStatuses, allCorrect;
 
@@ -91,17 +92,17 @@ define([
     });
   };
 
-  ctMain.solveTask.setAnswer = function(appState, message, nextTask){
+  ctMain.solveTask.setAnswer = function(appState, message){
     return appState.setIn(['answers', message.pronounIndex], message.value);
   };
 
   ctMain.taskIncorrect = {};
 
-  ctMain.taskIncorrect.setTaskIncorrectDisplayMode = function(appState, message, nextTask){
+  ctMain.taskIncorrect.setTaskIncorrectDisplayMode = function(appState, message){
     return appState.set('taskIncorrectDisplayMode', message.value);
   };
 
-  ctMain.taskIncorrect.submit = function (appState, message, nextTask){
+  ctMain.taskIncorrect.submit = function (appState, message){
     if (appState.numAttempted === appState.numToAttempt) {
       return appState.mergeDeep({
         stateName: 'exerciseFinished',
@@ -112,7 +113,7 @@ define([
     } else {
       return appState.mergeDeep({
         stateName: 'solveTask',
-        task: nextTask(appState),
+        task: ctMain.nextTask(appState),
         answers: ctRecords.INITIAL_ANSWERS,
         answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
         taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS
@@ -127,7 +128,7 @@ define([
 
   ctMain.exerciseFinished = {};
 
-  ctMain.exerciseFinished.startAgain = function(appState, message, nextTask){
+  ctMain.exerciseFinished.startAgain = function(appState, message){
     return appState.mergeDeep({
       stateName: 'configureExercise',
       numAttempted: 0,
@@ -137,7 +138,7 @@ define([
     });
   };
 
-  ctMain.noop = function (appState, message, nextTask){
+  ctMain.noop = function (appState, message){
     return appState // Unmodified
   };
 
@@ -165,7 +166,7 @@ define([
    * @param nextTask
    * @return {*}
    */
-  ctMain.nextState = function(appState, message, nextTask) {
+  ctMain.nextState = function(appState, message) {
     var dispatchKey, func;
 
     dispatchKey = appState.get('stateName') + '/' + message.type;
@@ -174,7 +175,7 @@ define([
       console.log('No handler found for dispatchKey "'+ dispatchKey +'"');
       func = ctMain.noop;
     }
-    return func(appState, message, nextTask);
+    return func(appState, message);
   };
 
   /**
@@ -184,19 +185,57 @@ define([
    * @constructor
    */
   ctMain.ConjugateThis = function(el) {
+
+    /**
+     * Element in which the app is rendered
+     */
     this.el = el;
+
+    /**
+     * The top-most React component
+     */
     this.component = null;
 
+    /**
+     * Stream of application messages
+     */
     this.bus = new Bacon.Bus();
-    this.appStates = Bacon.update(new ctRecords.AppState(), [this.bus], nextState);
 
-    function nextState(previous, message){
-      return ctMain.nextState(previous, message, ctMain.nextTask);
-    }
+    /**
+     * Stream of ctRecords.AppState instances
+     */
+    this.appStates = Bacon.update(new ctRecords.AppState(),
+        [this.bus], ctMain.nextState
+    );
+
+    /**
+     * Stream of state names
+     */
+    this.stateNames = this.appStates.map(function(appState){
+      return appState.get('stateName');
+    });
+
+    /**
+     * Stream of named transitions, eg. 'solveTask->taskIncorrect'
+     */
+    this.stateTransitions = this.stateNames
+      // Two at a time
+      .slidingWindow(2, 1)
+
+      // Only when changed
+      .filter(function(pairs){
+        return (pairs.length === 1) || (pairs[0] !== pairs[1]);
+      })
+
+      // Combine and format
+      .map(function(pairs){
+        return pairs.join('->');
+      }
+    );
 
     this.appStates.onValue(this.logAppStates.bind(this));
     this.appStates.onValue(this.render.bind(this));
-    this.appStates.onValue(this.playSound.bind(this));
+    this.stateTransitions.onValue(ctAudio.playSound);
   };
 
   ctMain.ConjugateThis.prototype.logAppStates = function(appState){
@@ -212,10 +251,6 @@ define([
     } else {
       this.component.setProps({as: appState});
     }
-  };
-
-  ctMain.ConjugateThis.prototype.playSound = function(appState){
-
   };
 
   ctMain.init = function() {
