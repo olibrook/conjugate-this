@@ -1,15 +1,20 @@
-define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConstants, ctUtils) {
+define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, ctRecords, ctUtils, Bacon) {
 
   'use strict';
 
   var ctViews = {},
-      d = React.DOM;
+      _ = React.DOM;
 
   ctViews.ConjugatorTextInput = React.createClass({
+
     displayName: 'ConjugatorTextInput',
 
-    render: function() {
+    propTypes: {
+      as: React.PropTypes.instanceOf(ctRecords.AppState).isRequired,
+      bus: React.PropTypes.instanceOf(Bacon.Bus).isRequired
+    },
 
+    render: function() {
       var answerStatus, pronoun, pronounIndex, isIrregular, groupClass,
           feedback, correctAnswer, conjugated, task, tenseKey,
           value, displayMode;
@@ -18,44 +23,43 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       pronoun = this.props.pronoun;
       task = this.props.as.get('task');
       tenseKey = this.props.tenseKey;
-      pronounIndex = ctConstants.PRONOUNS.get(pronoun);
+      pronounIndex = ctRecords.PRONOUNS.get(pronoun);
       displayMode = this.props.as.get('taskIncorrectDisplayMode');
-
 
       if (task === null) {
         isIrregular = false;
 
       } else {
-        tenseKey = ctConstants.TENSES.get(task.get('tense'));
+        tenseKey = ctRecords.TENSES.get(task.get('tense'));
         conjugated = task.getIn(['verb', 'conjugations', tenseKey, pronounIndex]);
         isIrregular = conjugated.get(0) === 'i';
         correctAnswer = conjugated.get(1);
       }
 
       switch (answerStatus) {
-        case ctConstants.ANSWER_CORRECT:
+        case ctRecords.ANSWER_CORRECT:
           groupClass = ['form-group', 'has-success', 'has-feedback'];
-          feedback = d.span({className: 'glyphicon glyphicon-ok form-control-feedback'});
+          feedback = _.span({className: 'glyphicon glyphicon-ok form-control-feedback'});
           value = this.props.as.getIn(['answers', pronounIndex]);
           break;
 
-        case ctConstants.ANSWER_INCORRECT:
+        case ctRecords.ANSWER_INCORRECT:
           groupClass = ['form-group', 'has-error', 'has-feedback'];
-          feedback = d.span({className: 'glyphicon glyphicon-remove form-control-feedback'});
+          feedback = _.span({className: 'glyphicon glyphicon-remove form-control-feedback'});
 
           value = (
-            displayMode === ctConstants.DISPLAY_CORRECT_ANSWERS ? correctAnswer :
-            displayMode === ctConstants.DISPLAY_USER_ANSWERS ? this.props.as.getIn(['answers', pronounIndex]) :
+            displayMode === ctRecords.DISPLAY_CORRECT_ANSWERS ? correctAnswer :
+            displayMode === ctRecords.DISPLAY_USER_ANSWERS ? this.props.as.getIn(['answers', pronounIndex]) :
             '');
 
           break;
 
-        case ctConstants.ANSWER_UNGRADED:
+        case ctRecords.ANSWER_UNGRADED:
           groupClass = isIrregular ?
             ['form-group', 'has-warning', 'has-feedback'] :
             ['form-group'];
           feedback = isIrregular ?
-            d.span({className: 'glyphicon glyphicon-warning-sign form-control-feedback'}) :
+            _.span({className: 'glyphicon glyphicon-warning-sign form-control-feedback'}) :
             '';
           value = this.props.as.getIn(['answers', pronounIndex]);
           break;
@@ -66,12 +70,12 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       }
 
       return (
-        d.div({key: 'text-input-' + pronoun, className: groupClass.join(' ')},
-          d.div({className: 'input-group'},
-            d.span({className: 'input-group-addon'},
-              d.span({style: {display: 'inline-block', width: '90px'}}, pronoun)
+        _.div({key: 'text-input-' + pronoun, className: groupClass.join(' ')},
+          _.div({className: 'input-group'},
+            _.span({className: 'input-group-addon'},
+              _.span({style: {display: 'inline-block', width: '90px'}}, pronoun)
             ),
-            d.input({
+            _.input({
               className: 'form-control input-lg',
               type: 'text',
               onChange: this.onChange,
@@ -93,25 +97,23 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
     },
 
     setAnswer: function(answer) {
-      this.getDOMNode().dispatchEvent(
-        new CustomEvent('command', {
-          detail: {
-            type: 'setAnswer',
-            pronounIndex: this.props.pronounIndex,
-            value: answer
-          },
-          bubbles: true,
-          cancelable: false
-        })
-      );
+      this.props.bus.push({
+        type: 'setAnswer',
+        pronounIndex: this.props.pronounIndex,
+        value: answer
+      });
     }
   });
-
 
 
   ctViews.ExerciseForm = React.createClass({
 
     displayName: 'ExerciseForm',
+
+    propTypes: {
+      as: React.PropTypes.instanceOf(ctRecords.AppState).isRequired,
+      bus: React.PropTypes.instanceOf(Bacon.Bus).isRequired
+    },
 
     render: function() {
       var verb,
@@ -126,7 +128,7 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
       verb = this.props.as.getIn(['task', 'verb']);
       statusPronounPairs = ctUtils.zip(
         this.props.as.get('answerStatuses').toArray(),
-        ctConstants.PRONOUNS.keySeq().toArray()
+        ctRecords.PRONOUNS.keySeq().toArray()
       );
 
       if (task === null) {
@@ -138,39 +140,44 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
         tense = this.props.as.getIn(['task', 'tense']);
       }
 
-      return d.div({className: 'panel panel-default'},
-        d.div({className: 'panel-heading clearfix'},
-          d.div({className: 'pull-left'},
-            tense
-          ),
-          d.div({className: 'pull-right'},
-            d.span({className: 'badge'}, this.props.as.get('numCorrect') + ' / ' + this.props.as.get('numAttempted'))
-          )
-        ),
-        d.div({className: 'panel-body'},
-          d.h2({style: {margin: '0.75em 0'}}, display),
-          d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
-            statusPronounPairs.map(
-              function(statusPronounPair, index) {
-                return ctViews.ConjugatorTextInput({
-                  as: this.props.as,
-                  answerStatus: statusPronounPair[0],
-                  pronoun: statusPronounPair[1],
-                  pronounIndex: ctConstants.PRONOUNS.get(statusPronounPair[1]),
-                  tenseKey: task !== null ? ctConstants.TENSES.get(task.get('tense')) : null,
-                  ref: 'input-' + index
-                });
-              },
-              this
+      return (
+        _.div({className: 'panel panel-default'},
+          _.div({className: 'panel-heading clearfix'},
+            _.div({className: 'pull-left'},
+              tense
             ),
-            d.div({className: 'form-group clearfix'},
-              d.div({className: 'pull-left'},
-                d.button({type: 'submit', className: 'btn btn-primary'},
-                  stateName === 'solveTask' ? 'Check' : 'Continue'
-                )
+            _.div({className: 'pull-right'},
+              _.span({className: 'badge'}, this.props.as.get('numCorrect') + ' / ' + this.props.as.get('numAttempted'))
+            )
+          ),
+          _.div({className: 'panel-body'},
+            _.h2({style: {margin: '0.75em 0'}}, display),
+            _.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
+              statusPronounPairs.map(
+                function(statusPronounPair, index) {
+                  return ctViews.ConjugatorTextInput({
+                    as: this.props.as,
+                    bus: this.props.bus,
+                    answerStatus: statusPronounPair[0],
+                    pronoun: statusPronounPair[1],
+                    pronounIndex: ctRecords.PRONOUNS.get(statusPronounPair[1]),
+                    tenseKey: task !== null ? ctRecords.TENSES.get(task.get('tense')) : null,
+                    ref: 'input-' + index
+                  });
+                },
+                this
               ),
-              d.div({className: 'pull-right'},
-                ctViews.CorrectionsToggleButton({as: this.props.as})
+              _.div({className: 'form-group clearfix'},
+                _.div({className: 'pull-left'},
+                  _.button({type: 'submit', className: 'btn btn-primary'},
+                    stateName === 'solveTask' ? 'Check' : 'Continue'
+                  )
+                ),
+                _.div({className: 'pull-right'},
+                  ctViews.CorrectionsToggleButton({
+                    as: this.props.as, bus: this.props.bus
+                  })
+                )
               )
             )
           )
@@ -189,17 +196,8 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
     },
 
     onSubmit: function(e) {
-      console.log('OnSubmit');
       e.preventDefault();
-      this.getDOMNode().dispatchEvent(
-        new CustomEvent('command', {
-          detail: {
-            type: 'submit'
-          },
-          bubbles: true,
-          cancelable: false
-        })
-      );
+      this.props.bus.push({type: 'submit'});
     }
   });
 
@@ -208,23 +206,28 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     displayName: 'CorrectionsToggleButton',
 
+    propTypes: {
+      as: React.PropTypes.instanceOf(ctRecords.AppState).isRequired,
+      bus: React.PropTypes.instanceOf(Bacon.Bus).isRequired
+    },
+
     render: function() {
 
       if (this.props.as.get('stateName') === 'taskIncorrect') {
-        if (this.props.as.get('taskIncorrectDisplayMode') === ctConstants.DISPLAY_CORRECT_ANSWERS) {
-          return d.button(
+        if (this.props.as.get('taskIncorrectDisplayMode') === ctRecords.DISPLAY_CORRECT_ANSWERS) {
+          return _.button(
             {
-              onClick: this.onClick.bind(null, ctConstants.DISPLAY_USER_ANSWERS),
+              onClick: this.onClick.bind(null, ctRecords.DISPLAY_USER_ANSWERS),
               className: 'btn btn-default'
             },
             'Show my answers'
           );
         }
 
-        if (this.props.as.get('taskIncorrectDisplayMode') === ctConstants.DISPLAY_USER_ANSWERS) {
-          return d.button(
+        if (this.props.as.get('taskIncorrectDisplayMode') === ctRecords.DISPLAY_USER_ANSWERS) {
+          return _.button(
             {
-              onClick: this.onClick.bind(null, ctConstants.DISPLAY_CORRECT_ANSWERS),
+              onClick: this.onClick.bind(null, ctRecords.DISPLAY_CORRECT_ANSWERS),
               className: 'btn btn-default'
             },
             'Show correct answers'
@@ -232,22 +235,16 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
         }
       }
 
-      return d.span({}, '');
+      return _.span({}, '');
     },
 
     onClick: function(displayMode, e) {
       e.preventDefault();
 
-      this.getDOMNode().dispatchEvent(
-        new CustomEvent('command', {
-          detail: {
-            type: 'setTaskIncorrectDisplayMode',
-            value: displayMode
-          },
-          bubbles: true,
-          cancelable: false
-        })
-      );
+      this.props.bus.push({
+        type: 'setTaskIncorrectDisplayMode',
+        value: displayMode
+      });
     }
   });
 
@@ -256,34 +253,39 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     displayName: 'SettingsForm',
 
+    propTypes: {
+      as: React.PropTypes.instanceOf(ctRecords.AppState).isRequired,
+      bus: React.PropTypes.instanceOf(Bacon.Bus).isRequired
+    },
+
     renderTenseCheckboxes: function() {
-      return ctConstants.TENSES.map(function(tenseId, tense) {
-        return d.div({className: 'radio', key: tense},
-          d.label({},
-            d.input({
+      return ctRecords.TENSES.map(function(tenseId, tense) {
+        return _.div({className: 'radio', key: tense},
+          _.label({},
+            _.input({
               type: 'radio',
               name: 'tenseOptions',
               ref: tense,
               checked: this.props.as.getIn(['tense']) === tense,
               onChange: function(e) {this.onTenseChange(e, tense)}.bind(this)
             }),
-            d.span({style: {verticalAlign: 'top'}}, tense)
+            _.span({style: {verticalAlign: 'top'}}, tense)
           )
         );
       }, this).valueSeq().toArray();
     },
 
     renderPronounCheckboxes: function() {
-      return ctConstants.PRONOUNS.map(function(pronounIdx, pronoun) {
-        return d.div({className: 'checkbox', key: pronoun},
-          d.label({},
-            d.input({
+      return ctRecords.PRONOUNS.map(function(pronounIdx, pronoun) {
+        return _.div({className: 'checkbox', key: pronoun},
+          _.label({},
+            _.input({
               type: 'checkbox',
               ref: pronoun,
               checked: this.props.as.getIn(['pronouns', pronoun]),
               onChange: function(e) {this.onPronounChange(e, pronoun)}.bind(this)
             }),
-            d.span({style: {verticalAlign: 'top'}}, pronoun)
+            _.span({style: {verticalAlign: 'top'}}, pronoun)
           )
         );
       }, this).valueSeq().toArray();
@@ -294,71 +296,59 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
     },
 
     render: function() {
-      return d.div({className: 'panel panel-default'},
-        d.div({className: 'panel-heading'}, 'Settings Form'),
-        d.div({className: 'panel-body'},
-          d.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
+      return _.div({className: 'panel panel-default'},
+        _.div({className: 'panel-heading'}, 'Settings Form'),
+        _.div({className: 'panel-body'},
+          _.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
 
-            d.div({className: 'row'},
-              d.h2({}, 'Verbs'),
-              d.div({className: 'form-group'},
-                d.div({className: 'input-group'},
+            _.div({className: 'row'},
+              _.h2({}, 'Verbs'),
+              _.div({className: 'form-group'},
+                _.div({className: 'input-group'},
                   this.renderVerbCheckboxes()
                 )
               )
             ),
 
-            d.div({className: 'row'},
-              d.div({className: 'col-md-6'},
-                d.h2({}, 'Tenses'),
-                d.div({className: 'form-group'},
-                  d.div({className: 'input-group'},
+            _.div({className: 'row'},
+              _.div({className: 'col-md-6'},
+                _.h2({}, 'Tenses'),
+                _.div({className: 'form-group'},
+                  _.div({className: 'input-group'},
                     this.renderTenseCheckboxes()
                   )
                 )
               ),
 
-              d.div({className: 'col-md-6'},
-                d.h2({}, 'Pronouns'),
-                d.div({className: 'form-group'},
-                  d.div({className: 'input-group'},
+              _.div({className: 'col-md-6'},
+                _.h2({}, 'Pronouns'),
+                _.div({className: 'form-group'},
+                  _.div({className: 'input-group'},
                     this.renderPronounCheckboxes()
                   )
                 )
               )
             ),
 
-            d.button({type: 'submit', className: 'btn btn-primary', onSubmit: this.onSubmit}, 'Start exercise')
+            _.button({type: 'submit', className: 'btn btn-primary', onSubmit: this.onSubmit}, 'Start exercise')
           )
         )
       );
     },
 
     onTenseChange: function(e, tense) {
-      this.getDOMNode().dispatchEvent(
-        new CustomEvent('command', {
-          detail: {
-            type: 'setTense',
-            value: tense
-          },
-          bubbles: true,
-          cancelable: false
-        })
-      );
+      this.props.bus.push({
+        type: 'setTense',
+        value: tense
+      });
     },
 
     onPronounChange: function(e, pronoun) {
-      this.getDOMNode().dispatchEvent(
-        new CustomEvent('command', {
-          detail: {
-            type: 'updatePronouns',
-            key: pronoun,
-            value: e.target.checked
-          },
-          bubbles: true,
-          cancelable: false
-        })
-      );
+      this.props.bus.push({
+        type: 'updatePronouns',
+        key: pronoun,
+        value: e.target.checked
+      });
     },
 
     /**
@@ -367,15 +357,9 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
     onSubmit: function(e) {
       e.preventDefault();
 
-      this.getDOMNode().dispatchEvent(
-        new CustomEvent('command', {
-          detail: {
-            type: 'startExercise'
-          },
-          bubbles: true,
-          cancelable: false
-        })
-      );
+      this.props.bus.push({
+        type: 'startExercise'
+      });
     }
   });
 
@@ -383,35 +367,43 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     displayName: 'ResultsView',
 
+    propTypes: {
+      as: React.PropTypes.instanceOf(ctRecords.AppState).isRequired,
+      bus: React.PropTypes.instanceOf(Bacon.Bus).isRequired
+    },
+
     render: function() {
       var content;
 
       if (this.props.as.get('stateName') === 'exerciseFinished') {
-        content = d.div({},
-          d.h3({}, 'Exercise complete. Score: ' +
-              this.props.as.get('numCorrect') + '/' +
-              this.props.as.get('numAttempted')),
-          d.button({className: 'btn btn-primary', onClick: this.onStartAgainClick}, 'Start again'));
+        content = (
+          _.div({},
+            _.h3({}, 'Exercise complete. Score: ' +
+                this.props.as.get('numCorrect') + '/' +
+                this.props.as.get('numAttempted')
+            ),
+            _.button(
+              {className: 'btn btn-primary', onClick: this.onStartAgainClick},
+              'Start again'
+            )
+          )
+        );
       } else {
-        content = d.div({}, '');
+        content = _.div({}, '');
       }
 
-      return d.div({className: 'panel panel-default'},
-        d.div({className: 'panel-heading'}, 'Results'),
-        d.div({className: 'panel-body'}, content)
+      return (
+        _.div({className: 'panel panel-default'},
+          _.div({className: 'panel-heading'}, 'Results'),
+          _.div({className: 'panel-body'}, content)
+        )
       );
     },
 
     onStartAgainClick: function(e) {
-      this.getDOMNode().dispatchEvent(
-        new CustomEvent('command', {
-          detail: {
-            type: 'startAgain'
-          },
-          bubbles: true,
-          cancelable: false
-        })
-      );
+      this.props.bus.push({
+        type: 'startAgain'
+      });
     }
   });
 
@@ -420,18 +412,37 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
 
     displayName: 'ConjugatorMain',
 
+    propTypes: {
+      as: React.PropTypes.instanceOf(ctRecords.AppState).isRequired,
+      bus: React.PropTypes.instanceOf(Bacon.Bus).isRequired
+    },
+
     render: function() {
-      return d.div({},
-        d.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
-          d.div({className: 'container'},
-            d.span({className: 'navbar-brand'}, 'Conjugate this')
-          )
-        ),
-        d.div({className: 'slider' , ref: 'slider'},
-          d.div({className: 'inner ' + this.props.as.get('stateName')},
-            d.div({className: 'slide'}, d.div({className: 'container'}, ctViews.SettingsForm({as: this.props.as}))),
-            d.div({className: 'slide'}, d.div({className: 'container'}, ctViews.ExerciseForm({as: this.props.as}))),
-            d.div({className: 'slide'}, d.div({className: 'container'}, ctViews.ResultsView({as: this.props.as})))
+      return (
+        _.div({},
+          _.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
+            _.div({className: 'container'},
+              _.span({className: 'navbar-brand'}, 'Conjugate this')
+            )
+          ),
+          _.div({className: 'slider' , ref: 'slider'},
+            _.div({className: 'inner ' + this.props.as.get('stateName')},
+              _.div({className: 'slide'},
+                _.div({className: 'container'},
+                  ctViews.SettingsForm({as: this.props.as, bus: this.props.bus})
+                )
+              ),
+              _.div({className: 'slide'},
+                _.div({className: 'container'},
+                  ctViews.ExerciseForm({as: this.props.as, bus: this.props.bus})
+                )
+              ),
+              _.div({className: 'slide'},
+                _.div({className: 'container'},
+                  ctViews.ResultsView({as: this.props.as, bus: this.props.bus})
+                )
+              )
+            )
           )
         )
       );
@@ -458,7 +469,5 @@ define(['React', 'conjthisConstants', 'conjthisUtils'], function(React, ctConsta
     }
   });
 
-
   return ctViews;
-
 });

@@ -4,10 +4,9 @@ define([
     'Immutable',
     'conjthisVerbs',
     'conjthisViews',
-    'conjthisConstants',
     'conjthisRecords',
     'conjthisUtils'
-], function(React, Bacon, Immutable, ctVerbs, ctViews, ctConstants, ctRecords, ctUtils) {
+], function(React, Bacon, Immutable, ctVerbs, ctViews, ctRecords, ctUtils) {
 
   'use strict';
 
@@ -52,8 +51,8 @@ define([
     return appState.mergeDeep({
       stateName: 'solveTask',
       task: nextTask(appState),
-      answers: ctConstants.INITIAL_ANSWERS,
-      answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
+      answers: ctRecords.INITIAL_ANSWERS,
+      answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES
     });
   };
 
@@ -63,7 +62,7 @@ define([
     var tenseKey, solutions, givenAnswers, solutionsAndAnswers,
         answerStatuses, allCorrect;
 
-    tenseKey = ctConstants.TENSES.get(appState.get('tense'));
+    tenseKey = ctRecords.TENSES.get(appState.get('tense'));
 
     solutions = appState.getIn(
       ['task', 'verb', 'conjugations', tenseKey]
@@ -77,11 +76,11 @@ define([
 
     answerStatuses = solutionsAndAnswers.map(function(arr) {
       return arr[0] === arr[1] ?
-        ctConstants.ANSWER_CORRECT : ctConstants.ANSWER_INCORRECT;
+        ctRecords.ANSWER_CORRECT : ctRecords.ANSWER_INCORRECT;
     });
 
     allCorrect = answerStatuses.every(function(status) {
-      return status === ctConstants.ANSWER_CORRECT;
+      return status === ctRecords.ANSWER_CORRECT;
     });
 
     return appState.mergeDeep({
@@ -106,17 +105,17 @@ define([
     if (appState.numAttempted === appState.numToAttempt) {
       return appState.mergeDeep({
         stateName: 'exerciseFinished',
-        answers: ctConstants.INITIAL_ANSWERS,
-        answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
+        answers: ctRecords.INITIAL_ANSWERS,
+        answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES
       }).set('task', null);  // Doesn't work with mergeDeep
 
     } else {
       return appState.mergeDeep({
         stateName: 'solveTask',
         task: nextTask(appState),
-        answers: ctConstants.INITIAL_ANSWERS,
-        answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES,
-        taskIncorrectDisplayMode: ctConstants.DISPLAY_CORRECT_ANSWERS
+        answers: ctRecords.INITIAL_ANSWERS,
+        answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
+        taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS
       });
     }
   };
@@ -133,8 +132,8 @@ define([
       stateName: 'configureExercise',
       numAttempted: 0,
       numCorrect: 0,
-      answers: ctConstants.INITIAL_ANSWERS,
-      answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES
+      answers: ctRecords.INITIAL_ANSWERS,
+      answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES
     });
   };
 
@@ -187,14 +186,10 @@ define([
   ctMain.ConjugateThis = function() {
     this.el = document.createElement('div');
     this.appState = new ctRecords.AppState();
-    this.component = React.renderComponent(
-      ctViews.ConjugatorMain({as: this.appState}), this.el
-    );
     this.bus = new Bacon.Bus();
-    this.commandStream = Bacon.fromEventTarget(this.el, 'command', function(event) {
-      return event.detail;
-    });
-    this.bus.plug(this.commandStream);
+    this.component = React.renderComponent(
+      ctViews.ConjugatorMain({as: this.appState, bus: this.bus}), this.el
+    );
     this.bus.onValue(
       function(message) {
         this.appState = ctMain.nextState(this.appState, message, ctMain.nextTask);

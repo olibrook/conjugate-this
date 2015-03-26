@@ -1,8 +1,57 @@
-define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants) {
+/**
+ * Constants and Records which form the model of the app.
+ */
+define(['Immutable'], function(Immutable) {
 
   'use strict';
 
   var ctRecords = {};
+
+  // Maps pronoun -> index used in the verbs data
+  ctRecords.PRONOUNS = Immutable.OrderedMap([
+    ['yo', 0],
+    ['tú', 1],
+    ['él/ella/Ud.', 2],
+    ['nosotros', 3],
+    ['vosotros', 4],
+    ['ellos/ellas/Uds.', 5]
+  ]);
+
+  // Maps tense -> key used in the verbs data
+  ctRecords.TENSES = Immutable.OrderedMap([
+    ['Indicative, present', 'indicative/present'],
+    ['Indicative, preterite', 'indicative/preterite'],
+    ['Indicative, future', 'indicative/future'],
+    ['Indicative, conditional', 'indicative/conditional'],
+    ['Indicative, imperfect', 'indicative/imperfect'],
+    ['Imperative', 'imperative/imperative'],
+    ['Subjunctive, present', 'subjunctive/present'],
+    ['Subjunctive, imperfect', 'subjunctive/imperfect'],
+    ['Subjunctive, imperfect 2', 'subjunctive/imperfect-2'],
+    ['Subjunctive, future', 'subjunctive/future']
+  ]);
+
+  ctRecords.INITIAL_ANSWERS = ctRecords.PRONOUNS.map(function() {
+    return '';
+  }).toList();
+
+  ctRecords.ANSWER_UNGRADED = 'ANSWER_UNGRADED';
+  ctRecords.ANSWER_CORRECT = 'ANSWER_CORRECT';
+  ctRecords.ANSWER_INCORRECT = 'ANSWER_INCORRECT';
+
+  ctRecords.INITIAL_ANSWER_STATUSES = ctRecords.PRONOUNS.map(function() {
+    return ctRecords.ANSWER_UNGRADED;
+  }).toList();
+
+  ctRecords.DISPLAY_CORRECT_ANSWERS = 'DISPLAY_CORRECT_ANSWERS';
+  ctRecords.DISPLAY_USER_ANSWERS = 'DISPLAY_USER_ANSWERS';
+
+
+
+
+
+
+
 
   /**
    * A translation/conjugation task.
@@ -38,21 +87,21 @@ define(['Immutable', 'conjthisConstants'], function(Immutable, ctConstants) {
     numToAttempt: 20,
 
     // The task answers as typed by the user
-    answers: ctConstants.INITIAL_ANSWERS,
+    answers: ctRecords.INITIAL_ANSWERS,
 
     // Correct/incorrect for each of the given answers. Array.<Boolean>
-    answerStatuses: ctConstants.INITIAL_ANSWER_STATUSES,
+    answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
 
     // Pronouns active on the exercise
-    pronouns: ctConstants.PRONOUNS.map(function() {
+    pronouns: ctRecords.PRONOUNS.map(function() {
       return true;
     }).toMap(),
 
     // Tense active for the exercise
-    tense: ctConstants.TENSES.keySeq().first(),
+    tense: ctRecords.TENSES.keySeq().first(),
 
     // Display corrections or user's answers when task incorrectly solved
-    taskIncorrectDisplayMode: ctConstants.DISPLAY_CORRECT_ANSWERS
+    taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS
   });
 
   return ctRecords;
