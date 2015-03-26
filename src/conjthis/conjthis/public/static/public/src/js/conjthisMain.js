@@ -183,24 +183,44 @@ define([
    *
    * @constructor
    */
-  ctMain.ConjugateThis = function() {
-    this.el = document.createElement('div');
-    this.appState = new ctRecords.AppState();
+  ctMain.ConjugateThis = function(el) {
+    this.el = el;
+    this.component = null;
+
     this.bus = new Bacon.Bus();
-    this.component = React.renderComponent(
-      ctViews.ConjugatorMain({as: this.appState, bus: this.bus}), this.el
-    );
-    this.bus.onValue(
-      function(message) {
-        this.appState = ctMain.nextState(this.appState, message, ctMain.nextTask);
-        console.log(this.appState.toJSON());
-        this.component.setProps({as: this.appState});
-      }.bind(this)
-    );
+    this.appStates = Bacon.update(new ctRecords.AppState(), [this.bus], nextState);
+
+    function nextState(previous, message){
+      return ctMain.nextState(previous, message, ctMain.nextTask);
+    }
+
+    this.appStates.onValue(this.logAppStates.bind(this));
+    this.appStates.onValue(this.render.bind(this));
+    this.appStates.onValue(this.playSound.bind(this));
+  };
+
+  ctMain.ConjugateThis.prototype.logAppStates = function(appState){
+    console.log(appState.toJSON());
+  };
+
+  ctMain.ConjugateThis.prototype.render = function(appState){
+    if(this.component === null){
+      this.component = React.renderComponent(
+        ctViews.ConjugatorMain({as: appState, bus: this.bus}),
+        this.el
+      );
+    } else {
+      this.component.setProps({as: appState});
+    }
+  };
+
+  ctMain.ConjugateThis.prototype.playSound = function(appState){
+
   };
 
   ctMain.init = function() {
-    var app = new ctMain.ConjugateThis();
+    var app;
+    app = new ctMain.ConjugateThis(document.createElement('div'));
     document.body.appendChild(app.el);
   };
 
