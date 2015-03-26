@@ -1,15 +1,3 @@
-// TODO: Add a 'finished' state with a results screen.
-// TODO: Plan for spaced repetition:
-//   - Each tense gets a queue of verb names
-//   - As a verb is completed, it is marked as correct or incorrect.
-//   - Correctly completed verbs go to the back of the queue, incorrect further
-//     to the front.
-//   - When picking the next verb for a task, always pick from the front of
-//     the queue.
-// TODO: Remove the task record. Totally unnecessary.
-// TODO: Ability to input spanish characters.
-// TODO: Stupid idea - make a turn-based, pokemon-style battle game out of this!
-
 define([
     'React',
     'Bacon',
@@ -105,11 +93,7 @@ define([
   };
 
   ctMain.solveTask.setAnswer = function(appState, message, nextTask){
-    // TODO: I think a mergeDeep does this more nicely!
-    return appState.set(
-      'answers',
-      appState.get('answers').set(message.pronounIndex, message.value)
-    );
+    return appState.setIn(['answers', message.pronounIndex], message.value);
   };
 
   ctMain.taskIncorrect = {};
