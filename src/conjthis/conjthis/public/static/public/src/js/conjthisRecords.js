@@ -54,15 +54,6 @@ define(['Immutable'], function(Immutable) {
 
 
   /**
-   * A translation/conjugation task.
-   * @type {*}
-   */
-  ctRecords.Task = Immutable.Record({
-    // The verb to conjugate
-    verb: null
-  });
-
-  /**
    * The entire AppState is a single, immutable record.
    * @type {*}
    */
@@ -71,8 +62,8 @@ define(['Immutable'], function(Immutable) {
     // The start state
     stateName: 'configureExercise',
 
-    // Current conjugation task
-    task: null,
+    // Current verb to conjugate
+    verb: null,
 
     // Number correctly answered
     numCorrect: 0,
@@ -83,7 +74,7 @@ define(['Immutable'], function(Immutable) {
     // Number of tasks in the exercise
     numToAttempt: 20,
 
-    // The task answers as typed by the user
+    // The answers as typed by the user
     answers: ctRecords.INITIAL_ANSWERS,
 
     // Correct/incorrect for each of the given answers. Array.<Boolean>

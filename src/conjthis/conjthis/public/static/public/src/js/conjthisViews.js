@@ -16,22 +16,22 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
 
     render: function() {
       var answerStatus, pronoun, pronounIndex, isIrregular, groupClass,
-          feedback, correctAnswer, conjugated, task, tenseKey,
+          feedback, correctAnswer, conjugated, verb, tenseKey,
           value, displayMode;
 
       answerStatus = this.props.answerStatus;
       pronoun = this.props.pronoun;
-      task = this.props.as.get('task');
+      verb = this.props.as.get('verb');
       tenseKey = this.props.tenseKey;
       pronounIndex = ctRecords.PRONOUNS.get(pronoun);
       displayMode = this.props.as.get('taskIncorrectDisplayMode');
 
-      if (task === null) {
+      if (verb === null) {
         isIrregular = false;
 
       } else {
         tenseKey = ctRecords.TENSES.get(this.props.as.get('tense'));
-        conjugated = task.getIn(['verb', 'conjugations', tenseKey, pronounIndex]);
+        conjugated = verb.getIn(['conjugations', tenseKey, pronounIndex]);
         isIrregular = conjugated.get(0) === 'i';
         correctAnswer = conjugated.get(1);
       }
@@ -119,19 +119,17 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
       var verb,
           stateName,
           display,
-          task,
           tense,
           statusPronounPairs;
 
-      task = this.props.as.get('task');
+      verb = this.props.as.get('verb');
       stateName = this.props.as.get('stateName');
-      verb = this.props.as.getIn(['task', 'verb']);
       statusPronounPairs = ctUtils.zip(
         this.props.as.get('answerStatuses').toArray(),
         ctRecords.PRONOUNS.keySeq().toArray()
       );
 
-      if (task === null) {
+      if (verb === null) {
         display = '';
         tense = '';
 
@@ -161,7 +159,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
                     answerStatus: statusPronounPair[0],
                     pronoun: statusPronounPair[1],
                     pronounIndex: ctRecords.PRONOUNS.get(statusPronounPair[1]),
-                    tenseKey: task !== null ? ctRecords.TENSES.get(this.props.as.get('tense')) : null,
+                    tenseKey: verb !== null ? ctRecords.TENSES.get(this.props.as.get('tense')) : null,
                     ref: 'input-' + index
                   });
                 },
@@ -189,7 +187,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
       var path;
 
       // Focus first field when verb changes
-      path = ['task', 'verb', 'spanish'];
+      path = ['verb', 'spanish'];
       if (prevProps.as.getIn(path) !== this.props.as.getIn(path)) {
         this.refs['input-0'].focus();
       }

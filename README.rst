@@ -6,6 +6,5 @@ TODO: Plan for spaced repetition:
     to the front.
   - When picking the next verb for a task, always pick from the front of
     the queue.
-TODO: Remove the task record. Totally unnecessary.
 TODO: Ability to input spanish characters.
 TODO: Stupid idea - make a turn-based, pokemon-style battle game out of this!

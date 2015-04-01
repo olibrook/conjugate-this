@@ -16,18 +16,8 @@ define([
   /**
    * Choose the next verb to practice.
    */
-  ctMain.chooseVerb = function(arr) {
-    return arr[Math.round(Math.random() * (arr.length - 1))];
-  };
-
-  ctMain.createTask = function(verb, appState) {
-    return new ctRecords.Task({
-      verb: Immutable.fromJS(verb)
-    });
-  };
-
-  ctMain.nextTask = function(appState) {
-    return ctMain.createTask(ctMain.chooseVerb(ctVerbs), appState);
+  ctMain.nextVerb = function(appState) {
+    return ctVerbs[Math.round(Math.random() * (ctVerbs.length - 1))];
   };
 
   ctMain.randomEntry = function(map) {
@@ -50,7 +40,7 @@ define([
   ctMain.configureExercise.startExercise = function(appState, message){
     return appState.mergeDeep({
       stateName: 'solveTask',
-      task: ctMain.nextTask(appState),
+      verb: ctMain.nextVerb(appState),
       answers: ctRecords.INITIAL_ANSWERS,
       answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES
     });
@@ -65,7 +55,7 @@ define([
     tenseKey = ctRecords.TENSES.get(appState.get('tense'));
 
     solutions = appState.getIn(
-      ['task', 'verb', 'conjugations', tenseKey]
+        ['verb', 'conjugations', tenseKey]
     ).map(function(val) {
         return val.get(1);
     }).toArray();
@@ -107,12 +97,12 @@ define([
         stateName: 'exerciseFinished',
         answers: ctRecords.INITIAL_ANSWERS,
         answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES
-      }).set('task', null);  // Doesn't work with mergeDeep
+      }).set('verb', null);  // Doesn't work with mergeDeep
 
     } else {
       return appState.mergeDeep({
         stateName: 'solveTask',
-        task: ctMain.nextTask(appState),
+        verb: ctMain.nextVerb(appState),
         answers: ctRecords.INITIAL_ANSWERS,
         answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
         taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS
@@ -162,7 +152,6 @@ define([
    *
    * @param appState
    * @param message
-   * @param nextTask
    * @return {*}
    */
   ctMain.nextState = function(appState, message) {
