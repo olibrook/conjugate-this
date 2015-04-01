@@ -30,7 +30,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
         isIrregular = false;
 
       } else {
-        tenseKey = ctRecords.TENSES.get(task.get('tense'));
+        tenseKey = ctRecords.TENSES.get(this.props.as.get('tense'));
         conjugated = task.getIn(['verb', 'conjugations', tenseKey, pronounIndex]);
         isIrregular = conjugated.get(0) === 'i';
         correctAnswer = conjugated.get(1);
@@ -137,7 +137,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
 
       } else {
         display = verb.get('spanish') + ' (' + verb.get('english') + ')';
-        tense = this.props.as.getIn(['task', 'tense']);
+        tense = this.props.as.get('tense');
       }
 
       return (
@@ -161,7 +161,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
                     answerStatus: statusPronounPair[0],
                     pronoun: statusPronounPair[1],
                     pronounIndex: ctRecords.PRONOUNS.get(statusPronounPair[1]),
-                    tenseKey: task !== null ? ctRecords.TENSES.get(task.get('tense')) : null,
+                    tenseKey: task !== null ? ctRecords.TENSES.get(this.props.as.get('tense')) : null,
                     ref: 'input-' + index
                   });
                 },
@@ -266,7 +266,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
               type: 'radio',
               name: 'tenseOptions',
               ref: tense,
-              checked: this.props.as.getIn(['tense']) === tense,
+              checked: this.props.as.get('tense') === tense,
               onChange: function(e) {this.onTenseChange(e, tense)}.bind(this)
             }),
             _.span({style: {verticalAlign: 'top'}}, tense)

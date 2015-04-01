@@ -58,9 +58,6 @@ define(['Immutable'], function(Immutable) {
    * @type {*}
    */
   ctRecords.Task = Immutable.Record({
-    // The tense required for this task
-    tense: '',
-
     // The verb to conjugate
     verb: null
   });

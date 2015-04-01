@@ -22,7 +22,6 @@ define([
 
   ctMain.createTask = function(verb, appState) {
     return new ctRecords.Task({
-      tense: appState.get('tense'),
       verb: Immutable.fromJS(verb)
     });
   };
