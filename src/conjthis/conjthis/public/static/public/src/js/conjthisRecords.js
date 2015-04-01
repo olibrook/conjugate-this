@@ -1,7 +1,7 @@
 /**
  * Constants and Records which form the model of the app.
  */
-define(['Immutable'], function(Immutable) {
+define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
 
   'use strict';
 
@@ -46,12 +46,19 @@ define(['Immutable'], function(Immutable) {
   ctRecords.DISPLAY_CORRECT_ANSWERS = 'DISPLAY_CORRECT_ANSWERS';
   ctRecords.DISPLAY_USER_ANSWERS = 'DISPLAY_USER_ANSWERS';
 
+  ctRecords.INITIAL_VERB_ORDER = Immutable.List(
+    ctVerbs.map(
+      function(verb){return verb.spanish;}
+    ).sort()
+  );
 
-
-
-
-
-
+  ctRecords.INDEXED_VERBS = ctVerbs.reduce(
+    function(accumulator, value){
+      accumulator[value.spanish] = value;
+      return accumulator;
+    },
+    {}
+  );
 
   /**
    * The entire AppState is a single, immutable record.
@@ -89,9 +96,13 @@ define(['Immutable'], function(Immutable) {
     tense: ctRecords.TENSES.keySeq().first(),
 
     // Display corrections or user's answers when task incorrectly solved
-    taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS
+    taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS,
+
+    // A queue of verbs to test, one per tense.
+    verbOrder: ctRecords.TENSES.map(function(){
+      return ctRecords.INITIAL_VERB_ORDER;
+    })
   });
 
   return ctRecords;
-
 });

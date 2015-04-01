@@ -13,19 +13,11 @@ define([
 
   var ctMain = {};
 
-  /**
-   * Choose the next verb to practice.
-   */
-  ctMain.nextVerb = function(appState) {
-    return ctVerbs[Math.round(Math.random() * (ctVerbs.length - 1))];
-  };
-
   ctMain.randomEntry = function(map) {
     var keys = map.keySeq().toArray(),
         randomKey = keys[Math.round(Math.random() * (keys.length - 1))];
     return [randomKey, map.get(randomKey)];
   };
-
 
   ctMain.configureExercise = {};
 
@@ -38,11 +30,16 @@ define([
   };
 
   ctMain.configureExercise.startExercise = function(appState, message){
-    return appState.mergeDeep({
+    var key, verbOrder;
+
+    key = ['verbOrder', appState.getIn(['tense'])];
+    verbOrder = appState.getIn(key);
+
+    return appState.merge({
       stateName: 'solveTask',
-      verb: ctMain.nextVerb(appState),
       answers: ctRecords.INITIAL_ANSWERS,
-      answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES
+      answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
+      verb: Immutable.fromJS(ctRecords.INDEXED_VERBS[verbOrder.first()])
     });
   };
 
@@ -91,29 +88,59 @@ define([
     return appState.set('taskIncorrectDisplayMode', message.value);
   };
 
-  ctMain.taskIncorrect.submit = function (appState, message){
-    if (appState.numAttempted === appState.numToAttempt) {
-      return appState.mergeDeep({
+  ctMain.nextTaskOrExit = function(appState, answeredCorrectly){
+    var orderKey, nextVerbKey;
+
+    if(appState.numAttempted === appState.numToAttempt){
+
+      return appState.merge({
         stateName: 'exerciseFinished',
         answers: ctRecords.INITIAL_ANSWERS,
         answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES
       }).set('verb', null);  // Doesn't work with mergeDeep
 
     } else {
-      return appState.mergeDeep({
+
+      orderKey = ['verbOrder', appState.getIn(['tense'])];
+
+      // This update does the spaced-repetition
+      appState = appState.updateIn(orderKey, function(verbOrder){
+        var verbKey, spliceIndex;
+
+        verbKey = verbOrder.first();
+        verbOrder = verbOrder.shift();
+
+        if(answeredCorrectly){
+          return verbOrder.push(verbKey);
+        } else {
+          spliceIndex = 10;
+          return verbOrder.splice(spliceIndex, 0, verbKey);
+        }
+      });
+
+      nextVerbKey = appState.getIn(orderKey).first();
+
+      return appState.merge({
         stateName: 'solveTask',
-        verb: ctMain.nextVerb(appState),
         answers: ctRecords.INITIAL_ANSWERS,
         answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
-        taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS
+        taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS,
+        verb: Immutable.fromJS(ctRecords.INDEXED_VERBS[nextVerbKey])
       });
     }
   };
 
+  ctMain.taskIncorrect.submit = function (appState, message){
+    var answeredCorrectly = false;
+    return ctMain.nextTaskOrExit(appState, answeredCorrectly);
+  };
+
   ctMain.taskCorrect = {};
 
-  ctMain.taskCorrect.submit = ctMain.taskIncorrect.submit;
-
+  ctMain.taskCorrect.submit = function (appState, message){
+    var answeredCorrectly = true;
+    return ctMain.nextTaskOrExit(appState, answeredCorrectly);
+  };
 
   ctMain.exerciseFinished = {};
 
