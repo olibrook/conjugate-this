@@ -57,7 +57,7 @@ define([
         return val.get(1);
     }).toArray();
 
-    givenAnswers = appState.answers.toArray();
+    givenAnswers = appState.get('answers').toArray();
 
     solutionsAndAnswers = ctUtils.zip(solutions, givenAnswers);
 
@@ -219,38 +219,31 @@ define([
     /**
      * Stream of ctRecords.AppState instances
      */
-    this.appStates = Bacon.update(new ctRecords.AppState(),
+    this.appStates = Bacon.update(ctRecords.restoreAppState(),
         [this.bus], ctMain.nextState
     );
 
     /**
-     * Stream of state names
+     * Sliding window of the most recent two app states.
      */
-    this.stateNames = this.appStates.map(function(appState){
-      return appState.get('stateName');
-    });
-
-    /**
-     * Stream of named transitions, eg. 'solveTask->taskIncorrect'
-     */
-    this.stateTransitions = this.stateNames
+    this.statesWhenChanged = this.appStates
       // Two at a time
       .slidingWindow(2, 1)
 
       // Only when changed
-      .filter(function(pairs){
-        return (pairs.length === 1) || (pairs[0] !== pairs[1]);
-      })
-
-      // Combine and format
-      .map(function(pairs){
-        return pairs.join('->');
+      .filter(function(states){
+        return (
+          states.length === 1 ||
+          states[0].get('stateName') !== states[1].get('stateName')
+        );
       }
     );
 
     this.appStates.onValue(this.logAppStates.bind(this));
     this.appStates.onValue(this.render.bind(this));
-    this.stateTransitions.onValue(ctAudio.playSound);
+
+    this.statesWhenChanged.onValue(ctAudio.playSound);
+    this.statesWhenChanged.onValue(this.saveAppState.bind(this));
   };
 
   ctMain.ConjugateThis.prototype.logAppStates = function(appState){
@@ -265,6 +258,22 @@ define([
       );
     } else {
       this.component.setProps({as: appState});
+    }
+  };
+
+  ctMain.ConjugateThis.prototype.saveAppState = function(appStates){
+    var transition, appState;
+
+    transition = appStates.map(
+      function(appState){
+        return appState.get('stateName')
+      }
+    ).join('->');
+
+    appState = appStates[appStates.length - 1];
+
+    if(transition === 'exerciseFinished->configureExercise') {
+      ctRecords.saveAppState(appState);
     }
   };
 

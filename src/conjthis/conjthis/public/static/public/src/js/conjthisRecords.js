@@ -104,5 +104,41 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
     })
   });
 
+
+
+  ctRecords.SAVE_KEY = 'ct-save';
+
+  /**
+   * Partial save of the AppState to local storage.
+   * @param appState
+   */
+  ctRecords.saveAppState = function(appState){
+    console.log('Saving app state');
+
+    var saveFields = {
+      verbOrder: appState.get('verbOrder').toJSON()
+    };
+    localStorage.setItem(ctRecords.SAVE_KEY, JSON.stringify(saveFields));
+  };
+
+  /**
+   * Partial restore of the AppState from local storage. Returns a new
+   * AppState if never saved before.
+   *
+   * @param appState
+   */
+  ctRecords.restoreAppState = function(){
+    var appState,
+        saved;
+
+    appState = new ctRecords.AppState();
+    saved = JSON.parse(localStorage.getItem(ctRecords.SAVE_KEY));
+    if(saved){
+      console.log('Restoring app state');
+      appState = appState.set('verbOrder', Immutable.fromJS(saved.verbOrder))
+    }
+    return appState;
+  };
+
   return ctRecords;
 });

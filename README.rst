@@ -1,5 +1,5 @@
-TODO: Ability to input spanish characters.
 TODO: Save progress to localstorage.
+TODO: Ability to input spanish characters.
 TODO: Load initial app state from localstorage, if saved previously.
 TODO: Add the verb "haber". One of the big three!
 TODO: Stupid idea - make a turn-based, pokemon-style battle game out of this!

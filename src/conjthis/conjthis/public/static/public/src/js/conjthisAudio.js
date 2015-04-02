@@ -8,8 +8,16 @@ define([], function() {
 
   ctAudio.correctAudio = new Audio('/static/public/src/audio/correct.mp3');
 
-  ctAudio.playSound = function(stateTransition) {
-    switch(stateTransition){
+  ctAudio.playSound = function(appStates) {
+    var transition;
+
+    transition = appStates.map(
+      function(appState){
+        return appState.get('stateName')
+      }
+    ).join('->');
+
+    switch(transition){
       case 'solveTask->taskIncorrect':
         ctAudio.incorrectAudio.play();
         break;
