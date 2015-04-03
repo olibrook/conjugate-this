@@ -78,6 +78,10 @@ define([
     });
   };
 
+  ctMain.solveTask.setFocusedAnswerIndex = function(appState, message) {
+    return appState.set('focusedAnswerIndex', message.value);
+  };
+
   ctMain.solveTask.setAnswer = function(appState, message){
     return appState.setIn(['answers', message.pronounIndex], message.value);
   };
@@ -125,7 +129,8 @@ define([
         answers: ctRecords.INITIAL_ANSWERS,
         answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
         taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS,
-        verb: Immutable.fromJS(ctRecords.INDEXED_VERBS[nextVerbKey])
+        verb: Immutable.fromJS(ctRecords.INDEXED_VERBS[nextVerbKey]),
+        focusedAnswerIndex: 0
       });
     }
   };
@@ -163,6 +168,7 @@ define([
     'configureExercise/updatePronouns': ctMain.configureExercise.updatePronouns,
     'configureExercise/startExercise': ctMain.configureExercise.startExercise,
     'solveTask/submit': ctMain.solveTask.submit,
+    'solveTask/setFocusedAnswerIndex': ctMain.solveTask.setFocusedAnswerIndex,
     'solveTask/setAnswer': ctMain.solveTask.setAnswer,
     'taskIncorrect/setTaskIncorrectDisplayMode': ctMain.taskIncorrect.setTaskIncorrectDisplayMode,
     'taskIncorrect/submit': ctMain.taskIncorrect.submit,

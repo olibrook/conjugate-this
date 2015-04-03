@@ -84,6 +84,9 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
     // The answers as typed by the user
     answers: ctRecords.INITIAL_ANSWERS,
 
+    // The index of the focused answer
+    focusedAnswerIndex: 0,
+
     // Correct/incorrect for each of the given answers. Array.<Boolean>
     answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
 

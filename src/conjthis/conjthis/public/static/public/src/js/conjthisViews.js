@@ -79,6 +79,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
               className: 'form-control input-lg',
               type: 'text',
               onChange: this.onChange,
+              onFocus: this.onFocus,
               value: value,
               ref: 'input'
             }),
@@ -90,6 +91,13 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
 
     focus: function() {
       this.refs['input'].getDOMNode().focus();
+    },
+
+    onFocus: function() {
+      this.props.bus.push({
+        type: 'setFocusedAnswerIndex',
+        value: this.props.pronounIndex
+      })
     },
 
     onChange: function(e) {
@@ -183,13 +191,11 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
       );
     },
 
-    componentDidUpdate: function(prevProps) {
-      var path;
-
-      // Focus first field when verb changes
-      path = ['verb', 'spanish'];
-      if (prevProps.as.getIn(path) !== this.props.as.getIn(path)) {
-        this.refs['input-0'].focus();
+    componentDidUpdate: function() {
+      var ref;
+      if(this.props.as.get('stateName') === 'solveTask') {
+        ref = 'input-' + this.props.as.get('focusedAnswerIndex');
+        this.refs[ref].focus();
       }
     },
 
@@ -432,7 +438,8 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
               ),
               _.div({className: 'slide'},
                 _.div({className: 'container'},
-                  ctViews.ExerciseForm({as: this.props.as, bus: this.props.bus})
+                  ctViews.ExerciseForm({as: this.props.as, bus: this.props.bus}),
+                  ctViews.CharacterMap({as: this.props.as, bus: this.props.bus})
                 )
               ),
               _.div({className: 'slide'},
@@ -464,6 +471,85 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
       setTimeout(function() {
         domNode.scrollLeft = 0;
       }, 40);
+    }
+  });
+
+
+  ctViews.CharacterMap = React.createClass({
+    displayName: 'CharacterMap',
+
+    chars: "ÁÉÍÓÚÜÑ¿¡",
+
+    propTypes: {
+      as: React.PropTypes.instanceOf(ctRecords.AppState).isRequired,
+      bus: React.PropTypes.instanceOf(Bacon.Bus).isRequired
+    },
+
+    getInitialState: function() {
+      return {
+        shiftHeld: false
+      }
+    },
+
+    componentDidMount: function(){
+
+      function isShift(e){
+        return e.keyCode === 16;
+      }
+
+      if(this.shiftChanged === undefined){
+        this.shiftKeyDowns = Bacon.fromEventTarget(document.body, 'keydown')
+            .filter(isShift)
+            .map(function(){return true});
+
+        this.shiftKeyUps = Bacon.fromEventTarget(document.body, 'keyup')
+            .filter(isShift)
+            .map(function(){return false});
+
+        this.shiftChanged = this.shiftKeyDowns.merge(this.shiftKeyUps);
+      }
+
+      this.unsubscribeShiftChanged = this.shiftChanged.onValue(this.onShiftChanged.bind(this));
+    },
+
+    componentWillUnmount: function(){
+      this.unsubscribeShiftChanged();
+    },
+
+    onShiftChanged: function(shiftHeld){
+      this.setState({shiftHeld: shiftHeld});
+    },
+
+    render: function(){
+      var chars, buttons;
+      chars = this.state.shiftHeld ? this.chars : this.chars.toLowerCase();
+      buttons = chars.split('').map(function(c, index){
+        return _.a(
+          {className: 'badge', onClick: this.onClick.bind(null, c), key: 'char-' + index, href: '#'},
+          c
+        );
+      }.bind(this));
+      return _.div({}, buttons);
+    },
+
+    /**
+     * @param ch String, character to append to focused answer
+     * @param e
+     */
+    onClick: function(ch, e){
+      var focusedAnswerIndex,
+          value;
+
+      e.preventDefault();
+
+      focusedAnswerIndex = this.props.as.get('focusedAnswerIndex');
+      value = this.props.as.getIn(['answers', focusedAnswerIndex]) + ch;
+
+      this.props.bus.push({
+        type: 'setAnswer',
+        pronounIndex: focusedAnswerIndex,
+        value: value
+      });
     }
   });
 
