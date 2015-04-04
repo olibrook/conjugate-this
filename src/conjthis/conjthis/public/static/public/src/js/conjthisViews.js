@@ -262,96 +262,34 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
       bus: React.PropTypes.instanceOf(Bacon.Bus).isRequired
     },
 
-    renderTenseCheckboxes: function() {
+    renderTenseOptions: function() {
       return ctRecords.TENSES.map(function(tenseId, tense) {
-        return _.div({className: 'radio', key: tense},
-          _.label({},
-            _.input({
-              type: 'radio',
-              name: 'tenseOptions',
-              ref: tense,
-              checked: this.props.as.get('tense') === tense,
-              onChange: function(e) {this.onTenseChange(e, tense)}.bind(this)
-            }),
-            _.span({style: {verticalAlign: 'top'}}, tense)
-          )
-        );
+          return _.option({value: tense, selected: this.props.as.get('tense') === tense}, tense);
       }, this).valueSeq().toArray();
-    },
-
-    renderPronounCheckboxes: function() {
-      return ctRecords.PRONOUNS.map(function(pronounIdx, pronoun) {
-        return _.div({className: 'checkbox', key: pronoun},
-          _.label({},
-            _.input({
-              type: 'checkbox',
-              ref: pronoun,
-              checked: this.props.as.getIn(['pronouns', pronoun]),
-              onChange: function(e) {this.onPronounChange(e, pronoun)}.bind(this)
-            }),
-            _.span({style: {verticalAlign: 'top'}}, pronoun)
-          )
-        );
-      }, this).valueSeq().toArray();
-    },
-
-    renderVerbCheckboxes: function() {
-
     },
 
     render: function() {
       return _.div({className: 'panel panel-default'},
         _.div({className: 'panel-heading'}, 'Settings Form'),
         _.div({className: 'panel-body'},
-          _.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
-
-            _.div({className: 'row'},
-              _.h2({}, 'Verbs'),
-              _.div({className: 'form-group'},
-                _.div({className: 'input-group'},
-                  this.renderVerbCheckboxes()
-                )
+          _.form({className: 'form-inline', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
+            _.div({className: 'form-group'},
+              _.div({className: 'input-group'},
+                _.select({onChange: this.onTenseChange},
+                  this.renderTenseOptions()
+                ),
+                _.button({type: 'submit', className: 'btn btn-primary', onSubmit: this.onSubmit}, 'Start exercise')
               )
-            ),
-
-            _.div({className: 'row'},
-              _.div({className: 'col-md-6'},
-                _.h2({}, 'Tenses'),
-                _.div({className: 'form-group'},
-                  _.div({className: 'input-group'},
-                    this.renderTenseCheckboxes()
-                  )
-                )
-              ),
-
-              _.div({className: 'col-md-6'},
-                _.h2({}, 'Pronouns'),
-                _.div({className: 'form-group'},
-                  _.div({className: 'input-group'},
-                    this.renderPronounCheckboxes()
-                  )
-                )
-              )
-            ),
-
-            _.button({type: 'submit', className: 'btn btn-primary', onSubmit: this.onSubmit}, 'Start exercise')
+            )
           )
         )
       );
     },
 
-    onTenseChange: function(e, tense) {
+    onTenseChange: function(e) {
       this.props.bus.push({
         type: 'setTense',
-        value: tense
-      });
-    },
-
-    onPronounChange: function(e, pronoun) {
-      this.props.bus.push({
-        type: 'updatePronouns',
-        key: pronoun,
-        value: e.target.checked
+        value: e.target.value
       });
     },
 
@@ -426,7 +364,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
         _.div({},
           _.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
             _.div({className: 'container'},
-              _.span({className: 'navbar-brand'}, 'Conjugate this')
+              _.a({className: 'navbar-brand', href: '/'}, 'Conjugate this')
             )
           ),
           _.div({className: 'slider' , ref: 'slider'},

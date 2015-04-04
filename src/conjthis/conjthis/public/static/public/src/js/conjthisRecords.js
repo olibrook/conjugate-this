@@ -90,11 +90,6 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
     // Correct/incorrect for each of the given answers. Array.<Boolean>
     answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
 
-    // Pronouns active on the exercise
-    pronouns: ctRecords.PRONOUNS.map(function() {
-      return true;
-    }).toMap(),
-
     // Tense active for the exercise
     tense: ctRecords.TENSES.keySeq().first(),
 

@@ -25,10 +25,6 @@ define([
     return appState.set('tense', message.value);
   };
 
-  ctMain.configureExercise.updatePronouns = function(appState, message){
-    return appState.setIn(['pronouns', message.key], message.value);
-  };
-
   ctMain.configureExercise.startExercise = function(appState, message){
     var key, verbOrder;
 
@@ -165,7 +161,6 @@ define([
 
   ctMain.dispatchMap = {
     'configureExercise/setTense': ctMain.configureExercise.setTense,
-    'configureExercise/updatePronouns': ctMain.configureExercise.updatePronouns,
     'configureExercise/startExercise': ctMain.configureExercise.startExercise,
     'solveTask/submit': ctMain.solveTask.submit,
     'solveTask/setFocusedAnswerIndex': ctMain.solveTask.setFocusedAnswerIndex,
