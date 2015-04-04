@@ -1,4 +1,4 @@
-define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, ctRecords, ctUtils, Bacon) {
+define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], function(React, ctRecords, ctUtils, Bacon, ctVerbs) {
 
   'use strict';
 
@@ -262,12 +262,6 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
       bus: React.PropTypes.instanceOf(Bacon.Bus).isRequired
     },
 
-    renderTenseOptions: function() {
-      return ctRecords.TENSES.map(function(tenseId, tense) {
-          return _.option({value: tense, selected: this.props.as.get('tense') === tense}, tense);
-      }, this).valueSeq().toArray();
-    },
-
     render: function() {
       return _.div({className: 'panel panel-default'},
         _.div({className: 'panel-heading'}, 'Settings Form'),
@@ -275,22 +269,13 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
           _.form({className: 'form-inline', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
             _.div({className: 'form-group'},
               _.div({className: 'input-group'},
-                _.select({onChange: this.onTenseChange},
-                  this.renderTenseOptions()
-                ),
+                ctViews.TensePicker({as: this.props.as, bus: this.props.bus}),
                 _.button({type: 'submit', className: 'btn btn-primary', onSubmit: this.onSubmit}, 'Start exercise')
               )
             )
           )
         )
       );
-    },
-
-    onTenseChange: function(e) {
-      this.props.bus.push({
-        type: 'setTense',
-        value: e.target.value
-      });
     },
 
     /**
@@ -369,6 +354,13 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
           ),
           _.div({className: 'slider' , ref: 'slider'},
             _.div({className: 'inner ' + this.props.as.get('stateName')},
+
+              _.div({className: 'slide'},
+                _.div({className: 'container'},
+                  ctViews.StatisticsView({as: this.props.as, bus: this.props.bus})
+                )
+              ),
+
               _.div({className: 'slide'},
                 _.div({className: 'container'},
                   ctViews.SettingsForm({as: this.props.as, bus: this.props.bus})
@@ -487,6 +479,93 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon'], function(React, c
         type: 'setAnswer',
         pronounIndex: focusedAnswerIndex,
         value: value
+      });
+    }
+  });
+
+  ctViews.StatisticsView = React.createClass({
+
+    displayName: 'StatisticsView',
+
+    render: function(){
+      var tense,
+          tenseKey,
+          verbOrder,
+          header,
+          rows;
+
+      tense = this.props.as.getIn(['tense']);
+      tenseKey = ctRecords.TENSES.get(tense);
+      verbOrder = this.props.as.getIn(['verbOrder', tense]);
+
+      header = (
+        _.tr({},
+          _.th({}, ''),
+          ctRecords.PRONOUNS.map(function(idx, pronoun){
+            return _.th({}, pronoun);
+          }).toArray()
+        )
+      );
+
+      rows = verbOrder.map(function(verbKey){
+        var verb;
+
+        verb = ctRecords.INDEXED_VERBS[verbKey];
+        return (
+          _.tr({},
+            _.th({}, verb.spanish),
+            ctRecords.PRONOUNS.map(function(idx, pronoun){
+              var conjugation = verb.conjugations[tenseKey][idx][1],
+                  isRegular = verb.conjugations[tenseKey][idx][0] === 'r',
+                  style = isRegular ? {} : {color: 'red'};
+
+              return _.td({style:style}, conjugation);
+            }).toArray()
+          )
+        );
+      }.bind(this)).toArray();
+
+      return (
+        _.div({},
+          _.div({className: 'row'},
+            _.div({className: 'col-md-6'},
+              _.h1({}, 'Statistics')
+            ),
+            _.div({className: 'col-md-6'},
+              ctViews.TensePicker({as: this.props.as, bus: this.props.bus})
+            )
+          ),
+          _.table({className: 'table table-bordered'},
+            _.thead({}, header),
+            _.tbody({}, rows)
+          )
+        )
+      )
+    }
+  });
+
+  ctViews.TensePicker = React.createClass({
+
+    displayName: 'TensePicker',
+
+    render: function(){
+      var options;
+
+      options = ctRecords.TENSES.map(function(tenseId, tense) {
+        return _.option({value: tense}, tense);
+      }, this).valueSeq().toArray();
+
+      return (
+        _.select({onChange: this.onTenseChange, value: this.props.as.get('tense')},
+          options
+        )
+      );
+    },
+
+    onTenseChange: function(e) {
+      this.props.bus.push({
+        type: 'setTense',
+        value: e.target.value
       });
     }
   });

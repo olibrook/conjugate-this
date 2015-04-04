@@ -19,11 +19,18 @@ define([
     return [randomKey, map.get(randomKey)];
   };
 
-  ctMain.configureExercise = {};
 
-  ctMain.configureExercise.setTense = function(appState, message){
+  ctMain.setTense = function(appState, message){
     return appState.set('tense', message.value);
   };
+
+  ctMain.viewStats = {};
+
+  ctMain.viewStats.setTense = ctMain.setTense;
+
+  ctMain.configureExercise = {};
+
+  ctMain.configureExercise.setTense = ctMain.setTense;
 
   ctMain.configureExercise.startExercise = function(appState, message){
     var key, verbOrder;
@@ -160,6 +167,7 @@ define([
   };
 
   ctMain.dispatchMap = {
+    'viewStats/setTense': ctMain.viewStats.setTense,
     'configureExercise/setTense': ctMain.configureExercise.setTense,
     'configureExercise/startExercise': ctMain.configureExercise.startExercise,
     'solveTask/submit': ctMain.solveTask.submit,
