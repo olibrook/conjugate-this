@@ -1,3 +1,4 @@
+TODO: Rename StatisticsView and related to VerbsList.
 TODO: Store scores for each and every verb/tense/pronoun and display these.
 TODO: Fix verbs which have reflexive solutions to display the reflexive infinitive.
 TODO: Save progress to localstorage.
