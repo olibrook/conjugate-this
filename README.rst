@@ -1,12 +1,12 @@
-TODO: Rename StatisticsView and related to VerbsList.
 TODO: Store scores for each and every verb/tense/pronoun and display these.
-TODO: Fix verbs which have reflexive solutions to display the reflexive infinitive.
 TODO: Save progress to localstorage.
 TODO: Load initial app state from localstorage, if saved previously.
 TODO: Add the verb "haber". One of the big three!
 TODO: Stupid idea - make a turn-based, pokemon-style battle game out of this!
 
 
+DONE: Fix verbs which have reflexive solutions to display the reflexive infinitive.
+DONE: Rename StatisticsView and related to VerbsList.
 DONE: Change opening screen - just a tense dropdown and a 'go' button.
 DONE: Remove pronoun selection.
 DONE: Ability to input spanish characters.

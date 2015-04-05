@@ -357,7 +357,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
 
               _.div({className: 'slide'},
                 _.div({className: 'container'},
-                  ctViews.StatisticsView({as: this.props.as, bus: this.props.bus})
+                  ctViews.VerbListView({as: this.props.as, bus: this.props.bus})
                 )
               ),
 
@@ -483,9 +483,9 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     }
   });
 
-  ctViews.StatisticsView = React.createClass({
+  ctViews.VerbListView = React.createClass({
 
-    displayName: 'StatisticsView',
+    displayName: 'VerbListView',
 
     render: function(){
       var tense,
@@ -498,12 +498,12 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       tense = this.props.as.getIn(['tense']);
       tenseKey = ctRecords.TENSES.get(tense);
 
-      order = this.props.as.get('statisticsVerbOrder');
+      order = this.props.as.get('verbListVerbOrder');
 
-      if(order == ctRecords.STATISTICS_ORDER_ALPHABETICALLY){
+      if(order == ctRecords.VERB_LIST_ORDER_ALPHABETICALLY){
         orderedVerbs = ctRecords.VERBS_ALPHABETICAL_ORDER;
 
-      } else if(order == ctRecords.STATISTICS_ORDER_AS_PRACTICED){
+      } else if(order == ctRecords.VERB_LIST_ORDER_AS_PRACTICED){
         orderedVerbs = this.props.as.getIn(['verbOrder', tense]);
 
       } else {
@@ -541,11 +541,11 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
         _.div({},
           _.div({className: 'row'},
             _.div({className: 'col-md-6'},
-              _.h1({}, 'Statistics')
+              _.h1({}, 'Verb List')
             ),
             _.div({className: 'col-md-6'},
               ctViews.TensePicker({as: this.props.as, bus: this.props.bus}),
-              ctViews.StatisticsVerbOrderToggle({as: this.props.as, bus: this.props.bus})
+              ctViews.VerbListVerbOrderToggle({as: this.props.as, bus: this.props.bus})
             )
           ),
           _.table({className: 'table table-bordered'},
@@ -583,22 +583,25 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     }
   });
 
-  ctViews.StatisticsVerbOrderToggle = React.createClass({
+  ctViews.VerbListVerbOrderToggle = React.createClass({
 
-    displayName: 'StatisticsVerbOrderToggle',
+    displayName: 'VerbListVerbOrderToggle',
 
     render: function(){
-      var currentValue = this.props.as.get('statisticsVerbOrder'),
-          otherValue = currentValue == ctRecords.STATISTICS_ORDER_AS_PRACTICED ?
-            ctRecords.STATISTICS_ORDER_ALPHABETICALLY :
-            ctRecords.STATISTICS_ORDER_AS_PRACTICED;
+      var currentValue = this.props.as.get('verbListVerbOrder'),
+          otherValue = currentValue == ctRecords.VERB_LIST_ORDER_AS_PRACTICED ?
+            ctRecords.VERB_LIST_ORDER_ALPHABETICALLY :
+            ctRecords.VERB_LIST_ORDER_AS_PRACTICED;
 
       return (
         _.a(
           {
             href: '#',
             className: 'btn btn-default',
-            onClick: function(){this.setOrder(otherValue)}.bind(this)
+            onClick: function(e){
+              e.preventDefault();
+              this.setOrder(otherValue)
+            }.bind(this)
           },
           otherValue
         )
@@ -607,7 +610,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
 
     setOrder: function(order) {
       this.props.bus.push({
-        type: 'setStatisticsVerbOrder',
+        type: 'setVerbListVerbOrder',
         value: order
       });
     }

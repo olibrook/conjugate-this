@@ -46,8 +46,8 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
   ctRecords.DISPLAY_CORRECT_ANSWERS = 'DISPLAY_CORRECT_ANSWERS';
   ctRecords.DISPLAY_USER_ANSWERS = 'DISPLAY_USER_ANSWERS';
 
-  ctRecords.STATISTICS_ORDER_AS_PRACTICED = 'Practice order';
-  ctRecords.STATISTICS_ORDER_ALPHABETICALLY = 'Alphabetical order';
+  ctRecords.VERB_LIST_ORDER_AS_PRACTICED = 'Practice order';
+  ctRecords.VERB_LIST_ORDER_ALPHABETICALLY = 'Alphabetical order';
 
   ctRecords.VERBS_ALPHABETICAL_ORDER = Immutable.List(
     ctVerbs.map(
@@ -105,9 +105,9 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
       return ctRecords.VERBS_ALPHABETICAL_ORDER;
     }),
 
-    // On the statistics screen display verbs alphabetically or in the
+    // On the verb list screen display verbs alphabetically or in the
     // order practiced for that tense.
-    statisticsVerbOrder: ctRecords.STATISTICS_ORDER_ALPHABETICALLY
+    verbListVerbOrder: ctRecords.VERB_LIST_ORDER_ALPHABETICALLY
   });
 
 

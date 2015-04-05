@@ -1952,7 +1952,7 @@ define([], function() {
         ["i", "se cayeran"]
       ]
     },
-    "spanish": "caer",
+    "spanish": "caerse",
     "english": "to fall down, to tumble"
   }, {
     "conjugations": {
@@ -5267,7 +5267,7 @@ define([], function() {
         ["r", "se sentaran"]
       ]
     },
-    "spanish": "sentar",
+    "spanish": "sentarse",
     "english": "to sit"
   }, {
     "conjugations": {
