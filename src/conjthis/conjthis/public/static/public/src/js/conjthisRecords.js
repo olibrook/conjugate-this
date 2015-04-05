@@ -46,7 +46,10 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
   ctRecords.DISPLAY_CORRECT_ANSWERS = 'DISPLAY_CORRECT_ANSWERS';
   ctRecords.DISPLAY_USER_ANSWERS = 'DISPLAY_USER_ANSWERS';
 
-  ctRecords.INITIAL_VERB_ORDER = Immutable.List(
+  ctRecords.STATISTICS_ORDER_AS_PRACTICED = 'Practice order';
+  ctRecords.STATISTICS_ORDER_ALPHABETICALLY = 'Alphabetical order';
+
+  ctRecords.VERBS_ALPHABETICAL_ORDER = Immutable.List(
     ctVerbs.map(
       function(verb){return verb.spanish;}
     ).sort()
@@ -99,8 +102,12 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
 
     // A queue of verbs to test, one per tense.
     verbOrder: ctRecords.TENSES.map(function(){
-      return ctRecords.INITIAL_VERB_ORDER;
-    })
+      return ctRecords.VERBS_ALPHABETICAL_ORDER;
+    }),
+
+    // On the statistics screen display verbs alphabetically or in the
+    // order practiced for that tense.
+    statisticsVerbOrder: ctRecords.STATISTICS_ORDER_ALPHABETICALLY
   });
 
 

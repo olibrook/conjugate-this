@@ -490,13 +490,25 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     render: function(){
       var tense,
           tenseKey,
-          verbOrder,
+          orderedVerbs,
           header,
-          rows;
+          rows,
+          order;
 
       tense = this.props.as.getIn(['tense']);
       tenseKey = ctRecords.TENSES.get(tense);
-      verbOrder = this.props.as.getIn(['verbOrder', tense]);
+
+      order = this.props.as.get('statisticsVerbOrder');
+
+      if(order == ctRecords.STATISTICS_ORDER_ALPHABETICALLY){
+        orderedVerbs = ctRecords.VERBS_ALPHABETICAL_ORDER;
+
+      } else if(order == ctRecords.STATISTICS_ORDER_AS_PRACTICED){
+        orderedVerbs = this.props.as.getIn(['verbOrder', tense]);
+
+      } else {
+        orderedVerbs = [];
+      }
 
       header = (
         _.tr({},
@@ -507,7 +519,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
         )
       );
 
-      rows = verbOrder.map(function(verbKey){
+      rows = orderedVerbs.map(function(verbKey){
         var verb;
 
         verb = ctRecords.INDEXED_VERBS[verbKey];
@@ -532,7 +544,8 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
               _.h1({}, 'Statistics')
             ),
             _.div({className: 'col-md-6'},
-              ctViews.TensePicker({as: this.props.as, bus: this.props.bus})
+              ctViews.TensePicker({as: this.props.as, bus: this.props.bus}),
+              ctViews.StatisticsVerbOrderToggle({as: this.props.as, bus: this.props.bus})
             )
           ),
           _.table({className: 'table table-bordered'},
@@ -566,6 +579,36 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       this.props.bus.push({
         type: 'setTense',
         value: e.target.value
+      });
+    }
+  });
+
+  ctViews.StatisticsVerbOrderToggle = React.createClass({
+
+    displayName: 'StatisticsVerbOrderToggle',
+
+    render: function(){
+      var currentValue = this.props.as.get('statisticsVerbOrder'),
+          otherValue = currentValue == ctRecords.STATISTICS_ORDER_AS_PRACTICED ?
+            ctRecords.STATISTICS_ORDER_ALPHABETICALLY :
+            ctRecords.STATISTICS_ORDER_AS_PRACTICED;
+
+      return (
+        _.a(
+          {
+            href: '#',
+            className: 'btn btn-default',
+            onClick: function(){this.setOrder(otherValue)}.bind(this)
+          },
+          otherValue
+        )
+      )
+    },
+
+    setOrder: function(order) {
+      this.props.bus.push({
+        type: 'setStatisticsVerbOrder',
+        value: order
       });
     }
   });

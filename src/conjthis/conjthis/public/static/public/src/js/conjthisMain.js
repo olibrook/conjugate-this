@@ -28,6 +28,10 @@ define([
 
   ctMain.viewStats.setTense = ctMain.setTense;
 
+  ctMain.viewStats.setStatisticsVerbOrder = function(appState, message){
+    return appState.set('statisticsVerbOrder', message.value);
+  };
+
   ctMain.configureExercise = {};
 
   ctMain.configureExercise.setTense = ctMain.setTense;
@@ -168,6 +172,7 @@ define([
 
   ctMain.dispatchMap = {
     'viewStats/setTense': ctMain.viewStats.setTense,
+    'viewStats/setStatisticsVerbOrder': ctMain.viewStats.setStatisticsVerbOrder,
     'configureExercise/setTense': ctMain.configureExercise.setTense,
     'configureExercise/startExercise': ctMain.configureExercise.startExercise,
     'solveTask/submit': ctMain.solveTask.submit,
