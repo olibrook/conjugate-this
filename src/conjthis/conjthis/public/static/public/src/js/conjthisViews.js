@@ -540,12 +540,16 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       return (
         _.div({},
           _.div({className: 'row'},
-            _.div({className: 'col-md-6'},
-              _.h1({}, 'Verb List')
+            _.div({className: 'col-md-6'}
+//              _.h1({}, 'Verbs')
             ),
             _.div({className: 'col-md-6'},
-              ctViews.TensePicker({as: this.props.as, bus: this.props.bus}),
-              ctViews.VerbListVerbOrderToggle({as: this.props.as, bus: this.props.bus})
+              _.form({className: 'form-inline'},
+                _.div({className: 'button-toolbar'},
+                  ctViews.TensePicker({as: this.props.as, bus: this.props.bus}),
+                  ctViews.VerbListVerbOrderToggle({as: this.props.as, bus: this.props.bus})
+                )
+              )
             )
           ),
           _.table({className: 'table table-bordered'},
@@ -569,7 +573,11 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       }, this).valueSeq().toArray();
 
       return (
-        _.select({onChange: this.onTenseChange, value: this.props.as.get('tense')},
+        _.select({
+            onChange: this.onTenseChange,
+            value: this.props.as.get('tense'),
+            className: 'form-control'
+          },
           options
         )
       );
