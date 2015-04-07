@@ -70,8 +70,7 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
   ctRecords.AppState = Immutable.Record({
 
     // The start state
-    stateName: 'viewStats',
-//    stateName: 'configureExercise',
+    stateName: 'configureExercise',
 
     // Current verb to conjugate
     verb: null,

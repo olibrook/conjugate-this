@@ -32,6 +32,10 @@ define([
     return appState.set('verbListVerbOrder', message.value);
   };
 
+  ctMain.viewStats.navigateToConfigureExercise = function(appState, message) {
+    return appState.set('stateName', 'configureExercise');
+  };
+
   ctMain.configureExercise = {};
 
   ctMain.configureExercise.setTense = ctMain.setTense;
@@ -48,6 +52,10 @@ define([
       answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
       verb: Immutable.fromJS(ctRecords.INDEXED_VERBS[verbOrder.first()])
     });
+  };
+
+  ctMain.configureExercise.navigateToVerbList = function(appState, message) {
+    return appState.set('stateName', 'viewStats');
   };
 
   ctMain.solveTask = {};
@@ -171,10 +179,12 @@ define([
   };
 
   ctMain.dispatchMap = {
+    'viewStats/navigateToConfigureExercise': ctMain.viewStats.navigateToConfigureExercise,
     'viewStats/setTense': ctMain.viewStats.setTense,
     'viewStats/setVerbListVerbOrder': ctMain.viewStats.setVerbListVerbOrder,
     'configureExercise/setTense': ctMain.configureExercise.setTense,
     'configureExercise/startExercise': ctMain.configureExercise.startExercise,
+    'configureExercise/navigateToVerbList': ctMain.configureExercise.navigateToVerbList,
     'solveTask/submit': ctMain.solveTask.submit,
     'solveTask/setFocusedAnswerIndex': ctMain.solveTask.setFocusedAnswerIndex,
     'solveTask/setAnswer': ctMain.solveTask.setAnswer,

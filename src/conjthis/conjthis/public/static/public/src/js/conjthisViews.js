@@ -347,11 +347,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     render: function() {
       return (
         _.div({},
-          _.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
-            _.div({className: 'container'},
-              _.a({className: 'navbar-brand', href: '/'}, 'Conjugate this')
-            )
-          ),
+          ctViews.Navbar({as: this.props.as, bus: this.props.bus}),
           _.div({className: 'slider' , ref: 'slider'},
             _.div({className: 'inner ' + this.props.as.get('stateName')},
 
@@ -363,6 +359,9 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
 
               _.div({className: 'slide'},
                 _.div({className: 'container'},
+                  _.div({style:{paddingBottom: '1em'}},
+                    ctViews.Subnavigation({as: this.props.as, bus: this.props.bus})
+                  ),
                   ctViews.SettingsForm({as: this.props.as, bus: this.props.bus})
                 )
               ),
@@ -404,6 +403,66 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     }
   });
 
+  ctViews.Navbar = React.createClass({
+    displayName: 'NavBar',
+
+    render: function(){
+      return (
+        _.div({className: 'navbar navbar-default navbar-static-top', role: 'nav'},
+          _.div({className: 'container'},
+            _.div({className: 'navbar-header'},
+              _.a({className: 'navbar-brand', href: '/'}, 'Conjugate this')
+            )
+          )
+        )
+      )
+    }
+  });
+
+  ctViews.Subnavigation = React.createClass({
+    displayName: 'Subnavigation',
+    render: function(){
+      var stateName = this.props.as.get('stateName'),
+          actions = [
+            ['viewStats', this.navigateToVerbList, 'Verbs'],
+            ['configureExercise', this.navigateToConfigureExercise, 'Exercises']
+          ],
+          listItems;
+
+      listItems = actions.map(function(action){
+        var actionState = action[0],
+            fn = action[1],
+            label = action[2];
+
+        return (
+            _.li({className: stateName === actionState ? 'active' : ''},
+              _.a({href: '#', onClick: stateName === actionState ? this.noop : fn}, label)
+            )
+          )
+      }.bind(this));
+
+      return _.ul({className: 'nav nav-pills'}, listItems);
+    },
+
+    noop: function(e){
+      e.preventDefault();
+    },
+
+    navigateToVerbList: function(e){
+      e.preventDefault();
+      this.props.bus.push({
+        type: 'navigateToVerbList'
+      });
+    },
+
+    navigateToConfigureExercise: function(e){
+      e.preventDefault();
+      this.props.bus.push({
+        type: 'navigateToConfigureExercise'
+      });
+    }
+
+  });
 
   ctViews.CharacterMap = React.createClass({
     displayName: 'CharacterMap',
@@ -539,11 +598,11 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
 
       return (
         _.div({},
-          _.div({className: 'row'},
-            _.div({className: 'col-md-6'}
-//              _.h1({}, 'Verbs')
-            ),
+          _.div({className: 'row', style: {paddingBottom: '1em'}},
             _.div({className: 'col-md-6'},
+              ctViews.Subnavigation({as: this.props.as, bus: this.props.bus})
+            ),
+            _.div({className: 'col-md-6', style: {textAlign: 'right'}},
               _.form({className: 'form-inline'},
                 _.div({className: 'button-toolbar'},
                   ctViews.TensePicker({as: this.props.as, bus: this.props.bus}),
