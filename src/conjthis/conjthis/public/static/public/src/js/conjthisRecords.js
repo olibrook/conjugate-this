@@ -129,8 +129,6 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
   /**
    * Partial restore of the AppState from local storage. Returns a new
    * AppState if never saved before.
-   *
-   * @param appState
    */
   ctRecords.restoreAppState = function(){
     var appState,

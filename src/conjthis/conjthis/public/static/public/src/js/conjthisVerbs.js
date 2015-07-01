@@ -5442,91 +5442,6 @@ define([], function() {
   }, {
     "conjugations": {
       "indicative/conditional": [
-        ["r", "hablaría"],
-        ["r", "hablarías"],
-        ["r", "hablaría"],
-        ["r", "hablaríamos"],
-        ["r", "hablaríais"],
-        ["r", "hablarían"]
-      ],
-      "imperative/imperative": [
-        ["r", "-"],
-        ["r", "habla"],
-        ["r", "hable"],
-        ["r", "hablemos"],
-        ["r", "hablad"],
-        ["r", "hablen"]
-      ],
-      "subjunctive/present": [
-        ["r", "hable"],
-        ["r", "hables"],
-        ["r", "hable"],
-        ["r", "hablemos"],
-        ["r", "habléis"],
-        ["r", "hablen"]
-      ],
-      "indicative/preterite": [
-        ["r", "hablé"],
-        ["r", "hablaste"],
-        ["r", "habló"],
-        ["r", "hablamos"],
-        ["r", "hablasteis"],
-        ["r", "hablaron"]
-      ],
-      "indicative/present": [
-        ["r", "hablo"],
-        ["r", "hablas"],
-        ["r", "habla"],
-        ["r", "hablamos"],
-        ["r", "habláis"],
-        ["r", "hablan"]
-      ],
-      "subjunctive/future": [
-        ["r", "hablare"],
-        ["r", "hablares"],
-        ["r", "hablare"],
-        ["r", "habláremos"],
-        ["r", "hablareis"],
-        ["r", "hablaren"]
-      ],
-      "indicative/imperfect": [
-        ["r", "hablaba"],
-        ["r", "hablabas"],
-        ["r", "hablaba"],
-        ["r", "hablábamos"],
-        ["r", "hablabais"],
-        ["r", "hablaban"]
-      ],
-      "indicative/future": [
-        ["r", "hablaré"],
-        ["r", "hablarás"],
-        ["r", "hablará"],
-        ["r", "hablaremos"],
-        ["r", "hablaréis"],
-        ["r", "hablarán"]
-      ],
-      "subjunctive/imperfect-2": [
-        ["r", "hablase"],
-        ["r", "hablases"],
-        ["r", "hablase"],
-        ["r", "hablásemos"],
-        ["r", "hablaseis"],
-        ["r", "hablasen"]
-      ],
-      "subjunctive/imperfect": [
-        ["r", "hablara"],
-        ["r", "hablaras"],
-        ["r", "hablara"],
-        ["r", "habláramos"],
-        ["r", "hablarais"],
-        ["r", "hablaran"]
-      ]
-    },
-    "spanish": "hablar",
-    "english": "to speak, to talk"
-  }, {
-    "conjugations": {
-      "indicative/conditional": [
         ["r", "deletrearía"],
         ["r", "deletrearías"],
         ["r", "deletrearía"],
@@ -7991,5 +7906,155 @@ define([], function() {
     },
     "spanish": "estar",
     "english": "to be"
+  },
+  {
+    "conjugations": {
+      "indicative/conditional": [
+        ["i", "habr\\u00eda"],
+        ["i", "habr\\u00edas"],
+        ["i", "habr\\u00eda"],
+        ["i", "habr\\u00edamos"],
+        ["i", "habr\\u00edais"],
+        ["i", "habr\\u00edan"]
+      ],
+      "imperative/imperative": [
+        ["r", "-"],
+        ["i", "he"],
+        ["i", "haya"],
+        ["i", "hayamos"],
+        ["r", "habed"],
+        ["i", "hayan"]
+      ],
+      "perfect/present": [
+        ["r", "he habido"],
+        ["r", "has habido"],
+        ["r", "ha habido"],
+        ["r", "hemos habido"],
+        ["r", "hab\\u00e9is habido"],
+        ["r", "han habido"]
+      ],
+      "perfect/conditional": [
+        ["r", "habr\\u00eda habido"],
+        ["r", "habr\\u00edas habido"],
+        ["r", "habr\\u00eda habido"],
+        ["r", "habr\\u00edamos habido"],
+        ["r", "habr\\u00edais habido"],
+        ["r", "habr\\u00edan habido"]
+      ],
+      "perfect-subjunctive/present": [
+        ["r", "haya habido"],
+        ["r", "hayas habido"],
+        ["r", "haya habido"],
+        ["r", "hayamos habido"],
+        ["r", "hay\\u00e1is habido"],
+        ["r", "hayan habido"]
+      ],
+      "subjunctive/present": [
+        ["i", "haya"],
+        ["i", "hayas"],
+        ["i", "haya"],
+        ["i", "hayamos"],
+        ["i", "hay\\u00e1is"],
+        ["i", "hayan"]
+      ],
+      "perfect/preterite": [
+        ["r", "hube habido"],
+        ["r", "hubiste habido"],
+        ["r", "hubo habido"],
+        ["r", "hubimos habido"],
+        ["r", "hubisteis habido"],
+        ["r", "hubieron habido"]
+      ],
+      "perfect-subjunctive/future": [
+        ["r", "hubiere habido"],
+        ["r", "hubieres habido"],
+        ["r", "hubiere habido"],
+        ["r", "hubi\\u00e9remos habido"],
+        ["r", "hubiereis habido"],
+        ["r", "hubieren habido"]
+      ],
+      "indicative/preterite": [
+        ["i", "hube"],
+        ["i", "hubiste"],
+        ["i", "hubo"],
+        ["i", "hubimos"],
+        ["i", "hubisteis"],
+        ["i", "hubieron"]
+      ],
+      "indicative/present": [
+        ["i", "he"],
+        ["i", "has"],
+        ["i", "ha,hay"],
+        ["i", "hemos"],
+        ["r", "hab\\u00e9is"],
+        ["i", "han"]
+      ],
+      "subjunctive/future": [
+        ["i", "hubiere"],
+        ["i", "hubieres"],
+        ["i", "hubiere"],
+        ["i", "hubi\\u00e9remos"],
+        ["i", "hubiereis"],
+        ["i", "hubieren"]
+      ],
+      "indicative/imperfect": [
+        ["r", "hab\\u00eda"],
+        ["r", "hab\\u00edas"],
+        ["r", "hab\\u00eda"],
+        ["r", "hab\\u00edamos"],
+        ["r", "hab\\u00edais"],
+        ["r", "hab\\u00edan"]
+      ],
+      "perfect-subjunctive/past": [
+        ["r", "hubiera habido"],
+        ["r", "hubieras habido"],
+        ["r", "hubiera habido"],
+        ["r", "hubi\\u00e9ramos habido"],
+        ["r", "hubierais habido"],
+        ["r", "hubieran habido"]
+      ],
+      "indicative/future": [
+        ["i", "habr\\u00e9"],
+        ["i", "habr\\u00e1s"],
+        ["i", "habr\\u00e1"],
+        ["i", "habremos"],
+        ["i", "habr\\u00e9is"],
+        ["i", "habr\\u00e1n"]
+      ],
+      "perfect/future": [
+        ["r", "habr\\u00e9 habido"],
+        ["r", "habr\\u00e1s habido"],
+        ["r", "habr\\u00e1 habido"],
+        ["r", "habremos habido"],
+        ["r", "habr\\u00e9is habido"],
+        ["r", "habr\\u00e1n habido"]
+      ],
+      "subjunctive/imperfect-2": [
+        ["i", "hubiese"],
+        ["i", "hubieses"],
+        ["i", "hubiese"],
+        ["i", "hubi\\u00e9semos"],
+        ["i", "hubieseis"],
+        ["i", "hubiesen"]
+      ],
+      "perfect/past": [
+        ["r", "hab\\u00eda habido"],
+        ["r", "hab\\u00edas habido"],
+        ["r", "hab\\u00eda habido"],
+        ["r", "hab\\u00edamos habido"],
+        ["r", "hab\\u00edais habido"],
+        ["r", "hab\\u00edan habido"]
+      ],
+      "subjunctive/imperfect": [
+        ["i", "hubiera"],
+        ["i", "hubieras"],
+        ["i", "hubiera"],
+        ["i", "hubi\\u00e9ramos"],
+        ["i", "hubierais"],
+        ["i", "hubieran"]
+      ]
+    },
+    "spanish": "haber",
+    "english": "have"
   }];
 });

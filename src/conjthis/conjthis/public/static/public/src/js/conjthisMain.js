@@ -19,10 +19,11 @@ define([
     return [randomKey, map.get(randomKey)];
   };
 
-
   ctMain.setTense = function(appState, message){
     return appState.set('tense', message.value);
   };
+
+
 
   ctMain.viewStats = {};
 
@@ -35,6 +36,8 @@ define([
   ctMain.viewStats.navigateToConfigureExercise = function(appState, message) {
     return appState.set('stateName', 'configureExercise');
   };
+
+
 
   ctMain.configureExercise = {};
 
@@ -57,6 +60,8 @@ define([
   ctMain.configureExercise.navigateToVerbList = function(appState, message) {
     return appState.set('stateName', 'viewStats');
   };
+
+
 
   ctMain.solveTask = {};
 
@@ -100,6 +105,8 @@ define([
   ctMain.solveTask.setAnswer = function(appState, message){
     return appState.setIn(['answers', message.pronounIndex], message.value);
   };
+
+
 
   ctMain.taskIncorrect = {};
 
@@ -175,7 +182,7 @@ define([
   };
 
   ctMain.noop = function (appState, message){
-    return appState // Unmodified
+    return appState; // Unmodified
   };
 
   ctMain.dispatchMap = {
