@@ -53,7 +53,7 @@ define([
       stateName: 'solveTask',
       answers: ctRecords.INITIAL_ANSWERS,
       answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
-      verb: Immutable.fromJS(ctRecords.INDEXED_VERBS[verbOrder.first()])
+      verb: ctRecords.INDEXED_VERBS.get(verbOrder.first())
     });
   };
 
@@ -67,9 +67,10 @@ define([
 
   ctMain.solveTask.submit = function(appState, message){
     var tenseKey, solutions, givenAnswers, solutionsAndAnswers,
-        answerStatuses, allCorrect;
+        answerStatuses, allCorrect, spanishInfinitive;
 
     tenseKey = ctRecords.TENSES.get(appState.get('tense'));
+    spanishInfinitive = appState.getIn(['verb', 'spanish']);
 
     solutions = appState.getIn(
         ['verb', 'conjugations', tenseKey]
@@ -90,12 +91,28 @@ define([
       return status === ctRecords.ANSWER_CORRECT;
     });
 
-    return appState.mergeDeep({
+    appState = appState.mergeDeep({
       stateName: allCorrect ? 'taskCorrect' : 'taskIncorrect',
       numCorrect: allCorrect ? appState.numCorrect + 1 : appState.numCorrect,
       numAttempted: appState.numAttempted + 1,
       answerStatuses: Immutable.List(answerStatuses)
     });
+
+    appState = appState.updateIn(
+      ['accumulatedScores', spanishInfinitive, tenseKey, 'attempted'],
+      function(old){
+        return old + 1
+      }
+    );
+
+    appState = appState.updateIn(
+      ['accumulatedScores', spanishInfinitive, tenseKey, 'correct'],
+      function(old){
+        return allCorrect ? old + 1 : old
+      }
+    );
+
+    return appState;
   };
 
   ctMain.solveTask.setFocusedAnswerIndex = function(appState, message) {
@@ -151,7 +168,7 @@ define([
         answers: ctRecords.INITIAL_ANSWERS,
         answerStatuses: ctRecords.INITIAL_ANSWER_STATUSES,
         taskIncorrectDisplayMode: ctRecords.DISPLAY_CORRECT_ANSWERS,
-        verb: Immutable.fromJS(ctRecords.INDEXED_VERBS[nextVerbKey]),
+        verb: ctRecords.INDEXED_VERBS.get(nextVerbKey),
         focusedAnswerIndex: 0
       });
     }

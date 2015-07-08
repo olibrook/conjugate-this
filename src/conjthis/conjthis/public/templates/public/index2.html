@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% load staticfiles %}
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="{% static 'public/lib/bootstrap/dist/css/bootstrap.css' %}"/>
+    <!--<link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.4/superhero/bootstrap.min.css"/>-->
+    <link rel="stylesheet" type="text/css" href="{% static 'public/dist/main.css' %}"/>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      .ct-root {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+
+      .ct-sidebar {
+        position: absolute;
+        top: 0;
+        right: auto;
+        bottom: 0;
+        width: 220px;
+        background-color: #263238;
+      }
+
+      .ct-main {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 220px;
+        overflow: hidden;
+        background-color: #37474F;
+      }
+
+      .ct-screen {
+        position: absolute;
+        top: -100vh;
+        right: 0;
+        height: 100vh;
+        left: 0;
+      }
+
+      .ct-screen--inactive {
+        z-index: 5;
+        animation: ct-screen--inactive 0.5s 0s 1 ease-in-out forwards;
+      }
+
+      @keyframes ct-screen--inactive {
+        0%   {top: 0;}
+        100% {top: -100vh;}
+      }
+
+      .ct-screen--active {
+        z-index: 10;
+        animation: ct-screen--active 0.5s 0s 1 ease-in-out forwards;
+      }
+
+      @keyframes ct-screen--active {
+        0%   {top: -100vh;}
+        100% {top: 0;}
+      }
+
+      .ct-screen__toolbar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 80px;
+        background-color: #455A64;
+        color: white;
+        border-bottom: 4px solid #E96B56;
+        padding: 0 1.5em;
+      }
+
+      .ct-screen__content {
+        position: absolute;
+        top: 80px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        overflow-y: scroll;
+        background-color: #eaeaea;
+      }
+
+      .ct-panel {
+        margin: 1em;
+        padding: 2em;
+        background-color: white;
+        color: #2e2e2e;
+        width: 400px;
+        box-shadow: rgba(0, 0, 0, 0.2) 0 2px 3px;
+        float: left;
+      }
+
+      .ct-sidebar__logo {
+        color: rgba(255, 255, 255, 0.4);
+        height: 80px;
+        line-height: 80px;
+        margin: 0;
+        padding: 0 1.5em;
+      }
+
+      .ct-sidebar__item {
+        width: 100%;
+        height: 2.5em;
+        line-height: 2.5em;
+        color: rgba(255, 255, 255, 0.4);
+        padding: 0 1em;
+        font-weight: bold;
+        margin: 0;
+      }
+
+      .ct-sidebar__item:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      .ct-sidebar__item.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #E96B56;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ct-root">
+      <div class="ct-sidebar">
+        <p class="ct-sidebar__logo">Conjugate This</p>
+        <p class="ct-sidebar__item active">One</p>
+        <p class="ct-sidebar__item">Two</p>
+        <p class="ct-sidebar__item">Three</p>
+        <p class="ct-sidebar__item">Four</p>
+      </div>
+      <div class="ct-main">
+        {% for i in '12345' %}
+          <div class="ct-screen ct-screen--inactive">
+            <div class="ct-screen__toolbar">
+
+              <div class="btn-group" role="group" aria-label="...">
+                <button type="button" class="btn btn-default">Left</button>
+                <button type="button" class="btn btn-default">Middle</button>
+                <button type="button" class="btn btn-default">Right</button>
+              </div>
+
+            </div>
+            <div class="ct-screen__content clearfix">
+              {% for j in '1234567890' %}
+                <div class="ct-panel">
+                  Screen content {{ j }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <script>
+      (function(){
+
+        function CtRoot(rootEl){
+          this.rootEl = rootEl;
+          this.screenEls = this.rootEl.querySelectorAll('.ct-screen');
+          this.firstEl = null;
+
+          this.index = 0;
+          this.onIndexChange(this.index);
+
+          this.start();
+        }
+
+        CtRoot.prototype.onIndexChange = function(index) {
+          var newFirst;
+
+          newFirst = this.screenEls[index];
+          newFirst.classList.add('ct-screen--active');
+          newFirst.classList.remove('ct-screen--inactive');
+
+          if(this.firstEl) {
+            this.firstEl.classList.add('ct-screen--inactive');
+            this.firstEl.classList.remove('ct-screen--active');
+          }
+
+          this.firstEl = newFirst;
+        };
+
+        CtRoot.prototype.setIndex = function(value) {
+          var isForward;
+
+          value = Math.max(0, Math.min(value, this.screenEls.length-1));
+          if(value !== this.index) {
+            isForward = value > this.index;
+            this.index = value;
+            this.onIndexChange(this.index, isForward);
+          }
+        };
+
+        CtRoot.prototype.start = function() {
+          var delta;
+
+          delta = -1;
+          setInterval(function(){
+            if((this.index == 0) || (this.index == (this.screenEls.length-1))) {
+              delta = delta * -1;
+            }
+            this.setIndex(this.index === null ? 0 : this.index + delta);
+          }.bind(this), 2500);
+        };
+
+        new CtRoot(document.querySelector('.ct-root'));
+
+
+      }());
+    </script>
+  </body>
+</html>

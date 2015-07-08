@@ -9,64 +9,70 @@
     <!--<link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootswatch/3.3.4/superhero/bootstrap.min.css"/>-->
     <link rel="stylesheet" type="text/css" href="{% static 'public/dist/main.css' %}"/>
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
       .slider {
         position: absolute;
-        top: 0;
+        top: 150px;
         left: 0;
-        height: 100vh;
+        bottom: 0;
+        right: 0;
         width: 100vw;
         overflow: hidden;
       }
 
       .slider .inner {
+        /*background-color: #60D7A9;*/
         position: absolute;
         left: 0;
         top: 0;
-        height: 100vh;
-        width: 300vw;
+        height: 100%;
+        width: 400vw;
         -webkit-transition: left 0.35s;
         transition: left 0.35s;
       }
 
       .slider .slide {
-        padding-top: 71px;
         position: absolute;
         top: 0;
         left: 0;
-        height: 100vh;
+        height: 100%;
         width: 100vw;
+        overflow-y: scroll;
       }
       .slider .slide:nth-child(1){
-        left: -100vw;
+        left: 0;
       }
       .slider .slide:nth-child(2){
-        left: 0;
+        left: 100vw;
       }
 
       .slider .slide:nth-child(3){
-        left: 100vw;
-      }
-
-      .slider .slide:nth-child(4){
         left: 200vw;
       }
 
+      .slider .slide:nth-child(4){
+        left: 300vw;
+      }
+
       .slider .inner.viewStats {
-        left: 100vw;
+        left: 0;
       }
 
       .slider .inner.configureExercise {
-        left: 0;
+        left: -100vw;
       }
 
       .slider .inner.solveTask,
       .slider .inner.taskCorrect,
       .slider .inner.taskIncorrect {
-        left: -100vw;
+        left: -200vw;
       }
 
       .slider .inner.exerciseFinished {
-        left: -200vw;
+        left: -300vw;
       }
 
 

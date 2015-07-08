@@ -55,13 +55,16 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
     ).sort()
   );
 
-  ctRecords.INDEXED_VERBS = ctVerbs.reduce(
-    function(accumulator, value){
-      accumulator[value.spanish] = value;
-      return accumulator;
-    },
-    {}
-  );
+  ctRecords.INDEXED_VERBS = function(){
+    var indexed, i, verb;
+
+    indexed = new Immutable.Map();
+    for(i=0; i<ctVerbs.length; i+=1) {
+      verb = ctVerbs[i];
+      indexed = indexed.set(verb.spanish, Immutable.fromJS(verb))
+    }
+    return indexed;
+  }();
 
   /**
    * The entire AppState is a single, immutable record.
@@ -106,7 +109,14 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
 
     // On the verb list screen display verbs alphabetically or in the
     // order practiced for that tense.
-    verbListVerbOrder: ctRecords.VERB_LIST_ORDER_ALPHABETICALLY
+    verbListVerbOrder: ctRecords.VERB_LIST_ORDER_ALPHABETICALLY,
+
+    // All-time scores for each verb and tense
+    accumulatedScores: ctRecords.INDEXED_VERBS.map(function(){
+      return ctRecords.TENSES.flip().map(function(){
+        return Immutable.Map({attempted: 0, correct: 0});
+      })
+    })
   });
 
 
@@ -121,7 +131,8 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
     console.log('Saving app state');
 
     var saveFields = {
-      verbOrder: appState.get('verbOrder').toJSON()
+      verbOrder: appState.get('verbOrder').toJSON(),
+      accumulatedScores: appState.get('accumulatedScores').toJSON()
     };
     localStorage.setItem(ctRecords.SAVE_KEY, JSON.stringify(saveFields));
   };
@@ -138,7 +149,8 @@ define(['Immutable', 'conjthisVerbs'], function(Immutable, ctVerbs) {
     saved = JSON.parse(localStorage.getItem(ctRecords.SAVE_KEY));
     if(saved){
       console.log('Restoring app state');
-      appState = appState.set('verbOrder', Immutable.fromJS(saved.verbOrder))
+      appState = appState.set('verbOrder', Immutable.fromJS(saved.verbOrder));
+      appState = appState.set('accumulatedScores', Immutable.fromJS(saved.accumulatedScores));
     }
     return appState;
   };

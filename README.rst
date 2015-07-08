@@ -1,4 +1,3 @@
-TODO: Store scores for each and every verb/tense/pronoun and display these.
 TODO: Update Verb List view to shade background color of cells based on
       number of times answered correctly.
 TODO: Save progress to localstorage.
@@ -20,3 +19,4 @@ DONE: Plan for spaced repetition:
   - When picking the next verb for a task, always pick from the front of
     the queue.
 DONE: Add the verb "haber". One of the big three!
+DONE: Store scores for each and every verb/tense and display these.

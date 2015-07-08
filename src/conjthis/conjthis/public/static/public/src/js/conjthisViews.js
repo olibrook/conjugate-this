@@ -348,6 +348,9 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       return (
         _.div({},
           ctViews.Navbar({as: this.props.as, bus: this.props.bus}),
+          _.div({className: 'container'},
+            ctViews.Subnavigation({as: this.props.as, bus: this.props.bus})
+          ),
           _.div({className: 'slider' , ref: 'slider'},
             _.div({className: 'inner ' + this.props.as.get('stateName')},
 
@@ -359,9 +362,6 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
 
               _.div({className: 'slide'},
                 _.div({className: 'container'},
-                  _.div({style:{paddingBottom: '1em'}},
-                    ctViews.Subnavigation({as: this.props.as, bus: this.props.bus})
-                  ),
                   ctViews.SettingsForm({as: this.props.as, bus: this.props.bus})
                 )
               ),
@@ -549,6 +549,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     render: function(){
       var tense,
           tenseKey,
+          spanishInfinitive,
           orderedVerbs,
           header,
           rows,
@@ -574,24 +575,32 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
           _.th({}, ''),
           ctRecords.PRONOUNS.map(function(idx, pronoun){
             return _.th({}, pronoun);
-          }).toArray()
+          }).toArray(),
+          _.th({}, 'Score')
         )
       );
 
       rows = orderedVerbs.map(function(verbKey){
         var verb;
 
-        verb = ctRecords.INDEXED_VERBS[verbKey];
+        verb = ctRecords.INDEXED_VERBS.get(verbKey);
+        spanishInfinitive = verb.getIn(['spanish']);
+
         return (
           _.tr({},
-            _.th({}, verb.spanish),
+            _.th({}, verb.getIn(['spanish'])),
             ctRecords.PRONOUNS.map(function(idx, pronoun){
-              var conjugation = verb.conjugations[tenseKey][idx][1],
-                  isRegular = verb.conjugations[tenseKey][idx][0] === 'r',
+              var conjugation = verb.getIn(['conjugations', tenseKey, idx, 1]),
+                  isRegular = verb.getIn(['conjugations', tenseKey, idx, 0]) === 'r',
                   style = isRegular ? {} : {color: 'red'};
 
               return _.td({style:style}, conjugation);
-            }).toArray()
+            }).toArray(),
+            _.td({},
+              this.props.as.getIn(['accumulatedScores', spanishInfinitive, tenseKey, 'correct']) +
+              '/' +
+              this.props.as.getIn(['accumulatedScores', spanishInfinitive, tenseKey, 'attempted'])
+            )
           )
         );
       }.bind(this)).toArray();
@@ -599,10 +608,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       return (
         _.div({},
           _.div({className: 'row', style: {paddingBottom: '1em'}},
-            _.div({className: 'col-md-6'},
-              ctViews.Subnavigation({as: this.props.as, bus: this.props.bus})
-            ),
-            _.div({className: 'col-md-6', style: {textAlign: 'right'}},
+            _.div({className: 'col-md-12', style: {textAlign: 'right'}},
               _.form({className: 'form-inline'},
                 _.div({className: 'button-toolbar'},
                   ctViews.TensePicker({as: this.props.as, bus: this.props.bus}),
