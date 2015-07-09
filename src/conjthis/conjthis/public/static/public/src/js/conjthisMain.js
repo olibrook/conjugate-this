@@ -300,8 +300,8 @@ define([
 
   ctMain.ConjugateThis.prototype.render = function(appState){
     if(this.component === null){
-      this.component = React.renderComponent(
-        ctViews.ConjugatorMain({as: appState, bus: this.bus}),
+      this.component = React.render(
+        ctViews.conjugatorMain({as: appState, bus: this.bus}),
         this.el
       );
     } else {

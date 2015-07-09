@@ -18,7 +18,7 @@ module.exports = function (grunt) {
         atBegin: true
       },
       publicLess: {
-        files: 'src/roomies/roomies/public/static/public/src/less/*.less',
+        files: 'src/conjthis/conjthis/public/static/public/src/less/*.less',
         tasks: ['less']
       }
     },
@@ -26,19 +26,7 @@ module.exports = function (grunt) {
     less: {
       public: {
         files: {
-          "src/roomies/roomies/public/static/public/dist/main.css": "src/roomies/roomies/public/static/public/src/less/main.less"
-        }
-      }
-    },
-
-    requirejs: {
-      public: {
-        options: {
-          baseUrl: "src/roomies/roomies/public/static/",
-          mainConfigFile: "src/roomies/roomies/public/static/publicConfig.js",
-          out: "src/roomies/roomies/public/static/public/dist/main.min.js",
-          name: 'public/lib/almond/almond',
-          include: "publicConfig"
+          "src/conjthis/conjthis/public/static/public/dist/main.css": "src/conjthis/conjthis/public/static/public/src/less/main.less"
         }
       }
     }

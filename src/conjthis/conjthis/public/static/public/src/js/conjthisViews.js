@@ -178,7 +178,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
                 _.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
                   statusPronounPairs.map(
                     function(statusPronounPair, index) {
-                      return ctViews.ConjugatorTextInput({
+                      return ctViews.conjugatorTextInput({
                         as: this.props.as,
                         bus: this.props.bus,
                         answerStatus: statusPronounPair[0],
@@ -197,7 +197,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
                       )
                     ),
                     _.div({className: 'pull-right'},
-                      ctViews.CorrectionsToggleButton({
+                      ctViews.correctionsToggleButton({
                         as: this.props.as, bus: this.props.bus
                       })
                     )
@@ -205,7 +205,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
                 )
               )
             ),
-            ctViews.CharacterMap({as: this.props.as, bus: this.props.bus})
+            ctViews.characterMap({as: this.props.as, bus: this.props.bus})
           )
         )
       );
@@ -293,7 +293,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
                 _.form({className: 'form-inline', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
                   _.div({className: 'form-group'},
                     _.div({className: 'input-group'},
-                      ctViews.TensePicker({as: this.props.as, bus: this.props.bus}),
+                      ctViews.tensePicker({as: this.props.as, bus: this.props.bus}),
                       _.button({type: 'submit', className: 'btn btn-primary', onSubmit: this.onSubmit}, 'Start exercise')
                     )
                   )
@@ -316,6 +316,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       });
     }
   });
+
 
   ctViews.ResultsView = React.createClass({
 
@@ -368,7 +369,6 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     }
   });
 
-
   ctViews.Screen = React.createClass({
     displayName: 'Screen',
 
@@ -386,7 +386,6 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
         )
       );
     }
-
   });
 
 
@@ -406,29 +405,30 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
 
       return (
         _.div({className: 'ct-root'},
-          ctViews.Navbar({as: this.props.as, bus: this.props.bus}),
+          ctViews.navbar({as: this.props.as, bus: this.props.bus}),
           _.div({className: 'ct-main' , ref: 'slider'},
 
-            ctViews.Screen({isActive: screen === 'verbList'},
-              ctViews.VerbListView({as: this.props.as, bus: this.props.bus})
+            ctViews.screen({isActive: screen === 'verbList'},
+              ctViews.verbListView({as: this.props.as, bus: this.props.bus})
             ),
 
-            ctViews.Screen({isActive: screen === 'settingsForm'},
-              ctViews.SettingsForm({as: this.props.as, bus: this.props.bus})
+            ctViews.screen({isActive: screen === 'settingsForm'},
+              ctViews.settingsForm({as: this.props.as, bus: this.props.bus})
             ),
 
-            ctViews.Screen({isActive: screen === 'exerciseForm'},
-              ctViews.ExerciseForm({as: this.props.as, bus: this.props.bus})
+            ctViews.screen({isActive: screen === 'exerciseForm'},
+              ctViews.exerciseForm({as: this.props.as, bus: this.props.bus})
             ),
 
-            ctViews.Screen({isActive: screen === 'resultsView'},
-              ctViews.ResultsView({as: this.props.as, bus: this.props.bus})
+            ctViews.screen({isActive: screen === 'resultsView'},
+              ctViews.resultsView({as: this.props.as, bus: this.props.bus})
             )
           )
         )
       );
     }
   });
+
 
   ctViews.Navbar = React.createClass({
     displayName: 'NavBar',
@@ -476,6 +476,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     }
 
   });
+
 
   ctViews.CharacterMap = React.createClass({
     displayName: 'CharacterMap',
@@ -555,6 +556,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     }
   });
 
+
   ctViews.VerbListView = React.createClass({
 
     displayName: 'VerbListView',
@@ -625,8 +627,8 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
               _.div({className: 'col-md-12', style: {textAlign: 'right'}},
                 _.form({className: 'form-inline'},
                   _.div({className: 'button-toolbar'},
-                    ctViews.TensePicker({as: this.props.as, bus: this.props.bus}),
-                    ctViews.VerbListVerbOrderToggle({as: this.props.as, bus: this.props.bus})
+                    ctViews.tensePicker({as: this.props.as, bus: this.props.bus}),
+                    ctViews.verbListVerbOrderToggle({as: this.props.as, bus: this.props.bus})
                   )
                 )
               )
@@ -642,6 +644,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       );
     }
   });
+
 
   ctViews.TensePicker = React.createClass({
 
@@ -672,6 +675,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       });
     }
   });
+
 
   ctViews.VerbListVerbOrderToggle = React.createClass({
 
@@ -705,6 +709,61 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       });
     }
   });
+
+
+
+
+  // Factory functions required by latest react version
+  // when not using JSX. Sigh.
+
+
+  ctViews.conjugatorTextInput = React.createFactory(
+    ctViews.ConjugatorTextInput
+  );
+
+  ctViews.exerciseForm = React.createFactory(
+    ctViews.ExerciseForm
+  );
+
+  ctViews.correctionsToggleButton = React.createFactory(
+    ctViews.CorrectionsToggleButton
+  );
+
+  ctViews.settingsForm = React.createFactory(
+    ctViews.SettingsForm
+  );
+
+  ctViews.resultsView = React.createFactory(
+    ctViews.ResultsView
+  );
+
+  ctViews.screen = React.createFactory(
+    ctViews.Screen
+  );
+
+  ctViews.conjugatorMain = React.createFactory(
+    ctViews.ConjugatorMain
+  );
+
+  ctViews.navbar = React.createFactory(
+    ctViews.Navbar
+  );
+
+  ctViews.characterMap = React.createFactory(
+    ctViews.CharacterMap
+  );
+
+  ctViews.verbListView = React.createFactory(
+    ctViews.VerbListView
+  );
+
+  ctViews.tensePicker = React.createFactory(
+    ctViews.TensePicker
+  );
+
+  ctViews.verbListVerbOrderToggle = React.createFactory(
+    ctViews.VerbListVerbOrderToggle
+  );
 
   return ctViews;
 });
