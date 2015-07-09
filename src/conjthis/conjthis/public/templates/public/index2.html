@@ -123,100 +123,14 @@
         background-color: rgba(255, 255, 255, 0.05);
       }
 
-      .ct-sidebar__item.active {
+      .ct-sidebar__item--active,
+      .ct-sidebar__item--active:hover {
         background-color: rgba(255, 255, 255, 0.1);
         color: #E96B56;
       }
     </style>
   </head>
   <body>
-    <div class="ct-root">
-      <div class="ct-sidebar">
-        <p class="ct-sidebar__logo">Conjugate This</p>
-        <p class="ct-sidebar__item active">One</p>
-        <p class="ct-sidebar__item">Two</p>
-        <p class="ct-sidebar__item">Three</p>
-        <p class="ct-sidebar__item">Four</p>
-      </div>
-      <div class="ct-main">
-        {% for i in '12345' %}
-          <div class="ct-screen ct-screen--inactive">
-            <div class="ct-screen__toolbar">
-
-              <div class="btn-group" role="group" aria-label="...">
-                <button type="button" class="btn btn-default">Left</button>
-                <button type="button" class="btn btn-default">Middle</button>
-                <button type="button" class="btn btn-default">Right</button>
-              </div>
-
-            </div>
-            <div class="ct-screen__content clearfix">
-              {% for j in '1234567890' %}
-                <div class="ct-panel">
-                  Screen content {{ j }}
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    <script>
-      (function(){
-
-        function CtRoot(rootEl){
-          this.rootEl = rootEl;
-          this.screenEls = this.rootEl.querySelectorAll('.ct-screen');
-          this.firstEl = null;
-
-          this.index = 0;
-          this.onIndexChange(this.index);
-
-          this.start();
-        }
-
-        CtRoot.prototype.onIndexChange = function(index) {
-          var newFirst;
-
-          newFirst = this.screenEls[index];
-          newFirst.classList.add('ct-screen--active');
-          newFirst.classList.remove('ct-screen--inactive');
-
-          if(this.firstEl) {
-            this.firstEl.classList.add('ct-screen--inactive');
-            this.firstEl.classList.remove('ct-screen--active');
-          }
-
-          this.firstEl = newFirst;
-        };
-
-        CtRoot.prototype.setIndex = function(value) {
-          var isForward;
-
-          value = Math.max(0, Math.min(value, this.screenEls.length-1));
-          if(value !== this.index) {
-            isForward = value > this.index;
-            this.index = value;
-            this.onIndexChange(this.index, isForward);
-          }
-        };
-
-        CtRoot.prototype.start = function() {
-          var delta;
-
-          delta = -1;
-          setInterval(function(){
-            if((this.index == 0) || (this.index == (this.screenEls.length-1))) {
-              delta = delta * -1;
-            }
-            this.setIndex(this.index === null ? 0 : this.index + delta);
-          }.bind(this), 2500);
-        };
-
-        new CtRoot(document.querySelector('.ct-root'));
-
-
-      }());
-    </script>
+    <script data-main="{% static 'publicConfig.js' %}" src="{% static 'public/lib/requirejs/require.js' %}"></script>
   </body>
 </html>
