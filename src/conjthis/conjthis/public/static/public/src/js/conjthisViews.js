@@ -160,6 +160,8 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
         tense = this.props.as.get('tense');
       }
 
+      console.log('render');
+
       return (
         _.div({},
           _.div({className: 'ct-screen__toolbar'}, 'Toolbar'),
@@ -691,7 +693,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
         _.a(
           {
             href: '#',
-            className: 'btn btn-default',
+            className: 'btn ct-btn-header',
             onClick: function(e){
               e.preventDefault();
               this.setOrder(otherValue)

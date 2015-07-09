@@ -1,3 +1,5 @@
+@import "../../lib/bootstrap/less/mixins/buttons.less";
+
 * {
   box-sizing: border-box;
 }
@@ -116,4 +118,9 @@
 .ct-sidebar__item--active:hover {
   background-color: rgba(255, 255, 255, 0.1);
   color: #E96B56;
+}
+
+
+.ct-btn-header {
+  .button-variant(white, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75));
 }
