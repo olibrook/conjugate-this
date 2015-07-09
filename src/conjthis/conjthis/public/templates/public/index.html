@@ -13,71 +13,122 @@
         box-sizing: border-box;
       }
 
-      .slider {
+      .ct-root {
         position: absolute;
-        top: 150px;
-        left: 0;
-        bottom: 0;
+        top: 0;
         right: 0;
-        width: 100vw;
+        bottom: 0;
+        left: 0;
+      }
+
+      .ct-sidebar {
+        position: absolute;
+        top: 0;
+        right: auto;
+        bottom: 0;
+        width: 220px;
+        background-color: #263238;
+      }
+
+      .ct-main {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 220px;
         overflow: hidden;
+        background-color: #37474F;
       }
 
-      .slider .inner {
-        /*background-color: #60D7A9;*/
+      .ct-screen {
         position: absolute;
+        top: -100vh;
+        right: 0;
+        height: 100vh;
         left: 0;
-        top: 0;
-        height: 100%;
-        width: 400vw;
-        -webkit-transition: left 0.35s;
-        transition: left 0.35s;
       }
 
-      .slider .slide {
+      .ct-screen--inactive {
+        z-index: 5;
+        animation: ct-screen--inactive 0.5s 0s 1 ease-in-out forwards;
+      }
+
+      @keyframes ct-screen--inactive {
+        0%   {top: 0;}
+        100% {top: -100vh;}
+      }
+
+      .ct-screen--active {
+        z-index: 10;
+        animation: ct-screen--active 0.5s 0s 1 ease-in-out forwards;
+      }
+
+      @keyframes ct-screen--active {
+        0%   {top: -100vh;}
+        100% {top: 0;}
+      }
+
+      .ct-screen__toolbar {
         position: absolute;
         top: 0;
+        right: 0;
         left: 0;
-        height: 100%;
-        width: 100vw;
+        height: 80px;
+        background-color: #455A64;
+        color: white;
+        border-bottom: 4px solid #E96B56;
+        padding: 0 1.5em;
+      }
+
+      .ct-screen__content {
+        position: absolute;
+        top: 80px;
+        right: 0;
+        bottom: 0;
+        left: 0;
         overflow-y: scroll;
-      }
-      .slider .slide:nth-child(1){
-        left: 0;
-      }
-      .slider .slide:nth-child(2){
-        left: 100vw;
+        background-color: #eaeaea;
       }
 
-      .slider .slide:nth-child(3){
-        left: 200vw;
+      .ct-panel {
+        margin: 1em;
+        padding: 2em;
+        background-color: white;
+        color: #2e2e2e;
+        width: 400px;
+        box-shadow: rgba(0, 0, 0, 0.2) 0 2px 3px;
+        float: left;
       }
 
-      .slider .slide:nth-child(4){
-        left: 300vw;
+      .ct-sidebar__logo {
+        color: rgba(255, 255, 255, 0.4);
+        height: 80px;
+        line-height: 80px;
+        margin: 0;
+        padding: 0 1.5em;
       }
 
-      .slider .inner.viewStats {
-        left: 0;
+      .ct-sidebar__item {
+        width: 100%;
+        height: 2.5em;
+        line-height: 2.5em;
+        color: rgba(255, 255, 255, 0.4);
+        padding: 0 1em;
+        font-weight: bold;
+        margin: 0;
       }
 
-      .slider .inner.configureExercise {
-        left: -100vw;
+      .ct-sidebar__item:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.05);
       }
 
-      .slider .inner.solveTask,
-      .slider .inner.taskCorrect,
-      .slider .inner.taskIncorrect {
-        left: -200vw;
+      .ct-sidebar__item--active,
+      .ct-sidebar__item--active:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #E96B56;
       }
-
-      .slider .inner.exerciseFinished {
-        left: -300vw;
-      }
-
-
     </style>
-
   </head>
   <body>
     <script data-main="{% static 'publicConfig.js' %}" src="{% static 'public/lib/requirejs/require.js' %}"></script>
