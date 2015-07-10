@@ -160,24 +160,25 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
         tense = this.props.as.get('tense');
       }
 
-      console.log('render');
-
       return (
         _.div({},
-          _.div({className: 'ct-screen__toolbar'}, 'Toolbar'),
+          _.div({className: 'ct-screen__toolbar clearfix'},
+            _.div({className: 'pull-left'},
+              _.h1({className: 'ct-screen__toolbar-heading'}, tense)
+            )
+          ),
           _.div({className: 'ct-screen__content'},
             _.div({className: 'panel panel-default'},
-              _.div({className: 'panel-heading clearfix'},
-                _.div({className: 'pull-left'},
-                  tense
-                ),
-                _.div({className: 'pull-right'},
-                  _.span({className: 'badge'}, this.props.as.get('numCorrect') + ' / ' + this.props.as.get('numAttempted'))
-                )
-              ),
               _.div({className: 'panel-body'},
-                _.h2({style: {margin: '0.75em 0'}}, display),
-                _.form({className: 'form-horizontal', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
+                _.div({className: 'clearfix'},
+                  _.div({className: 'pull-left'},
+                    _.h2({style: {margin: '0 0 15px'}}, display)
+                  ),
+                  _.div({className: 'pull-right'},
+                    _.span({className: 'badge'}, this.props.as.get('numCorrect') + ' / ' + this.props.as.get('numAttempted'))
+                  )
+                ),
+                _.form({className: 'form-horizontal', role: 'form', style: {margin: '0 15px'}, onSubmit: this.onSubmit},
                   statusPronounPairs.map(
                     function(statusPronounPair, index) {
                       return ctViews.conjugatorTextInput({
@@ -192,22 +193,23 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
                     },
                     this
                   ),
-                  _.div({className: 'form-group clearfix'},
+                  _.div({className: 'form-group clearfix', style: {marginBottom: '0'}},
                     _.div({className: 'pull-left'},
-                      _.button({type: 'submit', className: 'btn btn-primary'},
-                        stateName === 'solveTask' ? 'Check' : 'Continue'
-                      )
+                      ctViews.characterMap({as: this.props.as, bus: this.props.bus})
                     ),
                     _.div({className: 'pull-right'},
                       ctViews.correctionsToggleButton({
                         as: this.props.as, bus: this.props.bus
-                      })
+                      }),
+                      ' ',
+                      _.button({type: 'submit', className: 'btn btn-primary ct-btn-check-continue'},
+                        stateName === 'solveTask' ? 'Check' : 'Continue'
+                      )
                     )
                   )
                 )
               )
-            ),
-            ctViews.characterMap({as: this.props.as, bus: this.props.bus})
+            )
           )
         )
       );
@@ -244,9 +246,9 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
           return _.button(
             {
               onClick: this.onClick.bind(null, ctRecords.DISPLAY_USER_ANSWERS),
-              className: 'btn btn-default'
+              className: 'btn btn-default ct-btn-corrections-toggle'
             },
-            'Show my answers'
+            'My answers'
           );
         }
 
@@ -254,9 +256,9 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
           return _.button(
             {
               onClick: this.onClick.bind(null, ctRecords.DISPLAY_CORRECT_ANSWERS),
-              className: 'btn btn-default'
+              className: 'btn btn-default ct-btn-corrections-toggle'
             },
-            'Show correct answers'
+            'Correct answers'
           );
         }
       }
@@ -285,22 +287,26 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     },
 
     render: function() {
+
+      var tensePickers, i;
+
+      i = 0;
+      tensePickers = ctRecords.TENSES.map(function(tenseId, tense) {
+        return (
+          _.a({className: 'tense-choice', href: "#", onClick: function(e){this.onTenseClick(e, tense)}.bind(this)},
+            _.span({className: 'tense-choice__inner tense-choice__inner--' + i++}),
+            _.span({className: 'tense-choice__label'}, tense)
+          )
+        );
+      }, this).valueSeq().toArray();
+
       return (
         _.div({},
           _.div({className: 'ct-screen__toolbar'}, 'Toolbar'),
           _.div({className: 'ct-screen__content'},
-            _.div({className: 'panel panel-default'},
-              _.div({className: 'panel-heading'}, 'Settings Form'),
-              _.div({className: 'panel-body'},
-                _.form({className: 'form-inline', role: 'form', style: {margin: '15px'}, onSubmit: this.onSubmit},
-                  _.div({className: 'form-group'},
-                    _.div({className: 'input-group'},
-                      ctViews.tensePicker({as: this.props.as, bus: this.props.bus}),
-                      _.button({type: 'submit', className: 'btn btn-primary', onSubmit: this.onSubmit}, 'Start exercise')
-                    )
-                  )
-                )
-              )
+
+            _.div({style: {display: 'flex', flexWrap: 'wrap'}},
+              tensePickers
             )
           )
         )
@@ -312,6 +318,19 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
      */
     onSubmit: function(e) {
       e.preventDefault();
+
+      this.props.bus.push({
+        type: 'startExercise'
+      });
+    },
+
+    onTenseClick: function(e, tense) {
+      e.preventDefault();
+
+      this.props.bus.push({
+        type: 'setTense',
+        value: tense
+      });
 
       this.props.bus.push({
         type: 'startExercise'
@@ -375,17 +394,8 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     displayName: 'Screen',
 
     render: function() {
-      var active, inactive;
-
-      active = ' ct-screen--active';
-      inactive = ' ct-screen--inactive';
       return (
-        _.div(
-          {
-            className: 'ct-screen' + (this.props.isActive ? active  : inactive)
-          },
-          this.props.children
-        )
+        _.div({className: 'ct-screen'}, this.props.children)
       );
     }
   });
@@ -401,30 +411,39 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     },
 
     render: function() {
-      var screen;
-
-      screen = ctViews.getScreenName(this.props.as);
+      var screen = ctViews.getScreenName(this.props.as);
 
       return (
         _.div({className: 'ct-root'},
           ctViews.navbar({as: this.props.as, bus: this.props.bus}),
           _.div({className: 'ct-main' , ref: 'slider'},
 
-            ctViews.screen({isActive: screen === 'verbList'},
-              ctViews.verbListView({as: this.props.as, bus: this.props.bus})
-            ),
+            React.createElement(React.addons.CSSTransitionGroup, {transitionName: "example"},
 
-            ctViews.screen({isActive: screen === 'settingsForm'},
-              ctViews.settingsForm({as: this.props.as, bus: this.props.bus})
-            ),
+              (screen === 'verbList') ?
+                ctViews.screen({key: 'verbList'},
+                  ctViews.verbListView({as: this.props.as, bus: this.props.bus})
+                ) :
 
-            ctViews.screen({isActive: screen === 'exerciseForm'},
-              ctViews.exerciseForm({as: this.props.as, bus: this.props.bus})
-            ),
+              (screen === 'settingsForm') ?
+                ctViews.screen({key: 'settingsForm'},
+                  ctViews.settingsForm({as: this.props.as, bus: this.props.bus})
+                ) :
 
-            ctViews.screen({isActive: screen === 'resultsView'},
-              ctViews.resultsView({as: this.props.as, bus: this.props.bus})
+              (screen === 'exerciseForm') ?
+                ctViews.screen({key: 'exerciseForm'},
+                  ctViews.exerciseForm({as: this.props.as, bus: this.props.bus})
+                ) :
+
+              (screen === 'resultsView') ?
+
+                ctViews.screen({key: 'resultsView'},
+                  ctViews.resultsView({as: this.props.as, bus: this.props.bus})
+                ) :
+
+                _.span({}, 'No screen selected')
             )
+
           )
         )
       );
@@ -444,7 +463,9 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
 
       return (
         _.div({className: 'ct-sidebar'},
-          _.p({className: 'ct-sidebar__logo'}, 'Conjugate this'),
+          _.p({className: 'ct-sidebar__logo'},
+            _.a({href: '/'}, 'Conjugate this')
+          ),
           _.p(
             {
               className: 'ct-sidebar__item'  + (screen === 'settingsForm' ? active : inactive),
@@ -530,7 +551,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       chars = this.state.shiftHeld ? this.chars : this.chars.toLowerCase();
       buttons = chars.split('').map(function(c, index){
         return _.a(
-          {className: 'badge', onClick: this.onClick.bind(null, c), key: 'char-' + index, href: '#'},
+          {className: 'ct-character-map__character', onClick: this.onClick.bind(null, c), key: 'char-' + index, href: '#'},
           c
         );
       }.bind(this));
@@ -637,9 +658,11 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
             )
           ),
           _.div({className: 'ct-screen__content'},
-            _.table({className: 'table table-bordered'},
-              _.thead({}, header),
-              _.tbody({}, rows)
+            _.div({className: 'panel panel-default'},
+              _.table({className: 'table table-bordered'},
+                _.thead({}, header),
+                _.tbody({}, rows)
+              )
             )
           )
         )
