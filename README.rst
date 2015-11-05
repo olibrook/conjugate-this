@@ -3,6 +3,9 @@ Conjugate This
 
 A simple, unforgiving app for Spanish verb drills using spaced-repetition.
 
+Really, this is an excuse for me to build something small and personally useful
+while trying out some newer JS libraries - React, Immutable and Bacon.
+
 `Try it out! <https://rawgit.com/olibrook/conjugate-this/master/public/index.html>`_
 
 Setup
