@@ -1,3 +1,25 @@
+Conjugate This
+==============
+
+A simple, unforgiving app for Spanish verb drills using spaced-repetition.
+
+Setup
+-----
+
+    python2.7 bootstrap
+    ./bin/buildout
+
+Run
+---
+
+    ./bin/grunt serve
+
+Then point your browser at localhost:8000
+
+
+TODOS
+-----
+
 TODO: Update Verb List view to shade background color of cells based on
       number of times answered correctly.
 TODO: Save progress to localstorage.

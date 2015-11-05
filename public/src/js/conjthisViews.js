@@ -302,7 +302,9 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
 
       return (
         _.div({},
-          _.div({className: 'ct-screen__toolbar'}, 'Toolbar'),
+          _.div({className: 'ct-screen__toolbar'},
+            _.h1({className: 'ct-screen__toolbar-heading'}, 'Conjugate This')
+          ),
           _.div({className: 'ct-screen__content'},
 
             _.div({style: {display: 'flex', flexWrap: 'wrap'}},
@@ -349,33 +351,41 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     },
 
     render: function() {
-      var content;
+      var tense, numCorrect, numAttempted, judgement, percentage;
 
-      if (this.props.as.get('stateName') === 'exerciseFinished') {
-        content = (
-          _.div({},
-            _.h3({}, 'Exercise complete. Score: ' +
-                this.props.as.get('numCorrect') + '/' +
-                this.props.as.get('numAttempted')
-            ),
-            _.button(
-              {className: 'btn btn-primary', onClick: this.onStartAgainClick},
-              'Start again'
-            )
-          )
-        );
-      } else {
-        content = _.div({}, '');
-      }
+
+      tense = this.props.as.get('tense');
+      numCorrect = this.props.as.get('numCorrect');
+      numAttempted = this.props.as.get('numAttempted');
+      percentage = numCorrect / numAttempted;
+      judgement =
+        percentage == 1  ? "Perfect!" :
+        percentage > .95 ? "Great!" :
+        percentage > .75 ? "Pretty good." : "There's room for improvement here.";
 
       return (
         _.div({},
-          _.div({className: 'ct-screen__toolbar'}, 'Toolbar'),
+          _.div({className: 'ct-screen__toolbar'},
+            _.h1({className: 'ct-screen__toolbar-heading'}, tense)
+          ),
           _.div({className: 'ct-screen__content'},
             _.div({className: 'panel panel-default'},
               _.div({className: 'panel-heading'}, 'Results'),
               _.div({className: 'panel-body'},
-                content
+                _.form({className: 'form-horizontal', style: {margin: '0 15px'}},
+                  _.div({style: {textAlign: 'center'}},
+                    _.h3({}, 'You scored ' + numCorrect + '/' + numAttempted),
+                    _.p({}, judgement)
+                  ),
+                  _.div({className: 'form-group clearfix'},
+                    _.div({className: 'pull-right'},
+                      _.button(
+                        {className: 'btn btn-primary', onClick: this.onContinueClick},
+                        'Continue'
+                      )
+                    )
+                  )
+                )
               )
             )
           )
@@ -383,7 +393,8 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       );
     },
 
-    onStartAgainClick: function(e) {
+    onContinueClick: function(e) {
+      e.preventDefault();
       this.props.bus.push({
         type: 'startAgain'
       });
@@ -478,7 +489,7 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
               className: 'ct-sidebar__item' + (screen === 'verbList' ? active : inactive),
               onClick: this.navigateToVerbList
             },
-            'Verbs'
+            'Verbs and scores'
           )
         )
       )
@@ -646,13 +657,15 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       return (
         _.div({},
           _.div({className: 'ct-screen__toolbar'},
-            _.div({className: 'row', style: {paddingBottom: '1em'}},
-              _.div({className: 'col-md-12', style: {textAlign: 'right'}},
-                _.form({className: 'form-inline'},
-                  _.div({className: 'button-toolbar'},
-                    ctViews.tensePicker({as: this.props.as, bus: this.props.bus}),
-                    ctViews.verbListVerbOrderToggle({as: this.props.as, bus: this.props.bus})
-                  )
+            _.div({className: 'row'},
+              _.div({className: 'col-md-6'},
+                _.h1({className: 'ct-screen__toolbar-heading'}, 'Verbs and scores')
+              ),
+              _.div({className: 'col-md-6', style: {textAlign: 'right'}},
+                _.form({className: 'form-inline ct-screen__toolbar-form'},
+                  ctViews.tensePicker({as: this.props.as, bus: this.props.bus}),
+                  ' ',
+                  ctViews.verbListVerbOrderToggle({as: this.props.as, bus: this.props.bus})
                 )
               )
             )
@@ -683,12 +696,17 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
       }, this).valueSeq().toArray();
 
       return (
-        _.select({
-            onChange: this.onTenseChange,
-            value: this.props.as.get('tense'),
-            className: 'form-control'
-          },
-          options
+        _.div({className: 'form-group'},
+          _.label({htmlFor: 'tense-picker'}, 'Show tense'),
+          ' ',
+          _.select({
+              id: 'tense-picker',
+              onChange: this.onTenseChange,
+              value: this.props.as.get('tense'),
+              className: 'form-control'
+            },
+            options
+          )
         )
       );
     },
@@ -707,30 +725,36 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     displayName: 'VerbListVerbOrderToggle',
 
     render: function(){
-      var currentValue = this.props.as.get('verbListVerbOrder'),
-          otherValue = currentValue == ctRecords.VERB_LIST_ORDER_AS_PRACTICED ?
-            ctRecords.VERB_LIST_ORDER_ALPHABETICALLY :
-            ctRecords.VERB_LIST_ORDER_AS_PRACTICED;
+      var value = this.props.as.get('verbListVerbOrder'),
+          options = [
+            ctRecords.VERB_LIST_ORDER_ALPHABETICALLY,
+            ctRecords.VERB_LIST_ORDER_AS_PRACTICED
+          ];
+
+      options = options.map(function(opt){
+        return _.option({value: opt}, opt);
+      });
 
       return (
-        _.a(
-          {
-            href: '#',
-            className: 'btn ct-btn-header',
-            onClick: function(e){
-              e.preventDefault();
-              this.setOrder(otherValue)
-            }.bind(this)
-          },
-          otherValue
+        _.div({className: 'form-group'},
+          _.label({forHtml: 'verb-order-toggle'}, 'Sort by'),
+          ' ',
+          _.select({
+              id: 'verb-order-toggle',
+              onChange: this.onSortOrderChange,
+              value: value,
+              className: 'form-control'
+            },
+            options
+          )
         )
-      )
+      );
     },
 
-    setOrder: function(order) {
+    onSortOrderChange: function(e) {
       this.props.bus.push({
         type: 'setVerbListVerbOrder',
-        value: order
+        value: e.target.value
       });
     }
   });
