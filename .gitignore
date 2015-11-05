@@ -56,5 +56,3 @@ docs/_build/
 
 # Project-specific
 node_modules
-lib
-dist
