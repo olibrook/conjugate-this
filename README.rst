@@ -3,6 +3,8 @@ Conjugate This
 
 A simple, unforgiving app for Spanish verb drills using spaced-repetition.
 
+`Try it out! <https://rawgit.com/olibrook/conjugate-this/master/public/index.html>`_
+
 Setup
 -----
   ::
@@ -47,3 +49,4 @@ DONE
 
 - DONE: Add the verb "haber". One of the big three!
 - DONE: Store scores for each and every verb/tense and display these.
+
