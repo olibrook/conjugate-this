@@ -11,9 +11,9 @@ env/
 bin/
 build/
 develop-eggs/
-dist/
+#dist/
 eggs/
-lib/
+#lib/
 lib64/
 parts/
 sdist/
