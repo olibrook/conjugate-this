@@ -466,35 +466,39 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
     displayName: 'NavBar',
 
     render: function(){
-      var screen, active, inactive;
+      var screen, active, inactive, displayNav;
 
       screen = ctViews.getScreenName(this.props.as);
       active = ' ct-sidebar__item--active';
       inactive = '';
+      displayNav = ['exerciseForm', 'resultsView'].indexOf(screen) < 0;
 
-      return (
-        _.div({className: 'ct-sidebar'},
-          _.p({className: 'ct-sidebar__logo'},
-            _.a({href: '/'}, 'Conjugate this')
-          ),
-          _.a(
-            {
-              href: '#',
-              className: 'ct-sidebar__item'  + (screen === 'settingsForm' ? active : inactive),
-              onClick: this.navigateToConfigureExercise
-            },
-            'Home'
-          ),
-          _.a(
-            {
-              href: '#',
-              className: 'ct-sidebar__item' + (screen === 'verbList' ? active : inactive),
-              onClick: this.navigateToVerbList
-            },
-            'Verbs and scores'
+      if(displayNav) {
+        return (
+          _.div({className: 'ct-sidebar'},
+            _.a(
+              {
+                href: '#',
+                className: 'ct-sidebar__item'  + (screen === 'settingsForm' ? active : inactive),
+                onClick: this.navigateToConfigureExercise
+              },
+              'Home'
+            ),
+            _.a(
+              {
+                href: '#',
+                className: 'ct-sidebar__item' + (screen === 'verbList' ? active : inactive),
+                onClick: this.navigateToVerbList
+              },
+              'Verbs and scores'
+            )
           )
-        )
-      )
+        );
+      } else {
+        return (
+          _.div({className: 'ct-sidebar'})
+        );
+      }
     },
 
     navigateToVerbList: function(e){
@@ -660,10 +664,10 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
         _.div({},
           _.div({className: 'ct-screen__toolbar'},
             _.div({className: 'row'},
-              _.div({className: 'col-md-6'},
+              _.div({className: 'col-md-4'},
                 _.h1({className: 'ct-screen__toolbar-heading'}, 'Verbs and scores')
               ),
-              _.div({className: 'col-md-6', style: {textAlign: 'right'}},
+              _.div({className: 'col-md-8', style: {textAlign: 'right'}},
                 _.form({className: 'form-inline ct-screen__toolbar-form'},
                   ctViews.tensePicker({as: this.props.as, bus: this.props.bus}),
                   ' ',
