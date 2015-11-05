@@ -13,12 +13,13 @@ module.exports = function (grunt) {
   require('load-grunt-tasks')(grunt);
 
   grunt.initConfig({
+
     watch: {
       options: {
         atBegin: true
       },
       publicLess: {
-        files: 'src/conjthis/conjthis/public/static/public/src/less/*.less',
+        files: 'public/src/less/*.less',
         tasks: ['less']
       }
     },
@@ -26,18 +27,21 @@ module.exports = function (grunt) {
     less: {
       public: {
         files: {
-          "src/conjthis/conjthis/public/static/public/dist/main.css": "src/conjthis/conjthis/public/static/public/src/less/main.less"
+          "public/dist/main.css": "public/src/less/main.less"
+        }
+      }
+    },
+
+    connect: {
+      server: {
+        options: {
+          port: 8000,
+          base: 'public',
+          keepalive: true,
+          debug: true
         }
       }
     }
 
   });
-
-  grunt.registerTask('build', [
-    'closureBuilder'
-  ]);
-
-  grunt.registerTask('default', [
-    'build'
-  ]);
 };

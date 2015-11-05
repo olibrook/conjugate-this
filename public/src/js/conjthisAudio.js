@@ -4,9 +4,9 @@ define([], function() {
 
   var ctAudio = {};
 
-  ctAudio.incorrectAudio = new Audio('/static/public/src/audio/incorrect.mp3');
+  ctAudio.incorrectAudio = new Audio('/src/audio/incorrect.mp3');
 
-  ctAudio.correctAudio = new Audio('/static/public/src/audio/correct.mp3');
+  ctAudio.correctAudio = new Audio('/src/audio/correct.mp3');
 
   ctAudio.playSound = function(appStates) {
     var transition;
