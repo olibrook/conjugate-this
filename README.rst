@@ -42,3 +42,5 @@ DONE: Plan for spaced repetition:
     the queue.
 DONE: Add the verb "haber". One of the big three!
 DONE: Store scores for each and every verb/tense and display these.
+
+
