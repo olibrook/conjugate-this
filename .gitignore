@@ -56,6 +56,5 @@ docs/_build/
 
 # Project-specific
 node_modules
-target
-static/*/lib
-static/*/dist
+lib
+dist
