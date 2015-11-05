@@ -4,9 +4,28 @@ define([], function() {
 
   var ctAudio = {};
 
-  ctAudio.incorrectAudio = new Audio('/src/audio/incorrect.mp3');
+  /**
+   * Creates a new Audio object on each play - played sounds cannot overlap
+   * using the built-in Audio.
+   */
+  ctAudio.AudioWrapper = function(path){
+    this.path = path;
+    this.initAudio();
+  };
 
-  ctAudio.correctAudio = new Audio('/src/audio/correct.mp3');
+  ctAudio.AudioWrapper.prototype.initAudio = function() {
+    this.audio = new Audio(this.path);
+  };
+
+  ctAudio.AudioWrapper.prototype.play = function(){
+    this.audio.play();
+    this.initAudio();
+  };
+
+  ctAudio.correctAudio = new ctAudio.AudioWrapper('/src/audio/correct.mp3');
+
+  ctAudio.incorrectAudio = new ctAudio.AudioWrapper('/src/audio/incorrect.mp3');
+
 
   ctAudio.playSound = function(appStates) {
     var transition;
