@@ -246,7 +246,8 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
           return _.button(
             {
               onClick: this.onClick.bind(null, ctRecords.DISPLAY_USER_ANSWERS),
-              className: 'btn btn-default ct-btn-corrections-toggle'
+              className: 'btn btn-default ct-btn-corrections-toggle',
+              type: 'button'
             },
             'My answers'
           );
@@ -256,7 +257,8 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
           return _.button(
             {
               onClick: this.onClick.bind(null, ctRecords.DISPLAY_CORRECT_ANSWERS),
-              className: 'btn btn-default ct-btn-corrections-toggle'
+              className: 'btn btn-default ct-btn-corrections-toggle',
+              type: 'button'
             },
             'Correct answers'
           );
@@ -268,6 +270,8 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
 
     onClick: function(displayMode, e) {
       e.preventDefault();
+
+      console.log('Click display mode');
 
       this.props.bus.push({
         type: 'setTaskIncorrectDisplayMode',
