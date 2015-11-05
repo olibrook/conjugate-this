@@ -1,5 +1,5 @@
 {
-  "name": "roomies",
+  "name": "conjugate-this",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-uglify": "~0.2.0",
