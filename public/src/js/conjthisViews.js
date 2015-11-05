@@ -477,15 +477,17 @@ define(['React', 'conjthisRecords', 'conjthisUtils', 'Bacon', 'conjthisVerbs'], 
           _.p({className: 'ct-sidebar__logo'},
             _.a({href: '/'}, 'Conjugate this')
           ),
-          _.p(
+          _.a(
             {
+              href: '#',
               className: 'ct-sidebar__item'  + (screen === 'settingsForm' ? active : inactive),
               onClick: this.navigateToConfigureExercise
             },
             'Home'
           ),
-          _.p(
+          _.a(
             {
+              href: '#',
               className: 'ct-sidebar__item' + (screen === 'verbList' ? active : inactive),
               onClick: this.navigateToVerbList
             },
